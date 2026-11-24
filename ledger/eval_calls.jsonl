@@ -10,3 +10,4 @@
 {"time": "2026-11-24T11:49:12", "experiment": "g002-e00", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "a8353f70f45f08b9"}
 {"time": "2026-11-24T11:52:06", "experiment": "g001-e07a", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "98f95241f950877c"}
 {"time": "2026-11-24T11:55:01", "experiment": "g001-e07b", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "98f95241f950877c"}
+{"time": "2026-11-24T12:39:19", "experiment": "g002-e00p", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "9c11cae2aafcbc0c"}
