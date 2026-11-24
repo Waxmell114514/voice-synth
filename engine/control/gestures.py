@@ -68,6 +68,16 @@ def place_index(P, place):
     return int(np.clip(c, 0, N - 2))
 
 
+def _lp1(x, al):
+    """沿时间轴（axis 0）的一阶低通 y[i] = al·y[i-1] + (1−al)·x[i]，初值 y[0] = x[0]（无起始瞬态）。"""
+    from scipy.signal import lfilter, lfilter_zi
+    x = np.asarray(x, float)
+    zi = lfilter_zi([1.0 - al], [1.0, -al])
+    zi = zi.reshape((1,) + (1,) * (x.ndim - 1)) * x[:1]
+    y, _ = lfilter([1.0 - al], [1.0, -al], x, axis=0, zi=zi)
+    return y
+
+
 class Timeline:
     def __init__(self, P, frame_s):
         self.P = P
@@ -85,6 +95,12 @@ class Timeline:
         nf = max(2, int(np.ceil(total / self.fs)) + 1)
         t = np.arange(nf) * self.fs
         K = sorted(self.keys, key=lambda x: x[0])
+        # 静音（无发声、无气流）关键帧与紧随其后、同一时刻的声母关键帧：发音器官在静音中预先就位
+        # （静音帧取声母的面积函数与软腭口），否则平滑后的就位过程与声门外展重叠，产生无声母的气流噪声。
+        for i in range(len(K) - 1, 0, -1):
+            p, q = K[i - 1], K[i]
+            if q[0] - p[0] < 1e-9 and p[5] == 0.0 and p[6] == 0.0:
+                K[i - 1] = (p[0], q[1], q[2]) + tuple(p[3:])
         kt = np.array([k[0] for k in K])
         N = K[0][1].shape[0]
         A = np.empty((nf, N))
@@ -110,6 +126,11 @@ class Timeline:
             lev = np.full(nf, 3.0)
         st = (lev - 3.0) / 4.0 * P["f0_range_st"] + P["declination_st_per_s"] * t
         f0 = P["f0_base_hz"] * 2.0 ** (st / 12.0)
+        # 发音器官惯性（g001-e07c）：面积函数、软腭口与声门面积经两级一阶低通（各 artic_tau_ms/2，临界阻尼二阶，速度连续）。
+        # 同一时刻的两个关键帧（上一音节末目标与下一声母起始）否则会让这些量在一个控制块内跳变：
+        # 唇端输出 u = A_lip(1+r)f 随之阶跃（辐射差分后为爆音），准静态气流 U_DC 也随之阶跃。
+        al = float(np.exp(-self.fs / (0.5 * P["artic_tau_ms"] * 1e-3)))
+        A = _lp1(_lp1(A, al), al); Avp = _lp1(_lp1(Avp, al), al); ag = _lp1(_lp1(ag, al), al)
         A = np.maximum(A, P["min_area"])
         return A, Avp, nidx, ngain, voice, ag, f0
 

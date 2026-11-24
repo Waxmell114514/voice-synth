@@ -51,8 +51,9 @@ def render(tokens, P, seed):
     ug = np.cumsum(du * f0) / fs_sim * (P["ug_ac_peak_cm3s"] / lf_peak_flow(P["rd_modal"]))
     # 湍流噪声源（specs/g001-e07.md）：准静态气流 → Stevens 律幅度 × 系数 G × 种子白噪声
     clo = max(P["closure_area"], P["min_area"])
-    udc, _ = TB.dc_flow(A, Avp, ag, P["p_sub_pa"], clo)
-    amp_c = TB.constriction_amp(A, clo, nidx, udc, P["re_crit"], P["p_sub_pa"]) * ngain     # 每控制帧
+    udc, frac_oral = TB.dc_flow(A, Avp, ag, P["p_sub_pa"], clo)
+    # 口腔收紧源只用经口腔的那一路气流（软腭开时鼻腔分流，g001-e07c）
+    amp_c = TB.constriction_amp(A, clo, nidx, udc * frac_oral, P["re_crit"], P["p_sub_pa"]) * ngain     # 每控制帧
     ugl = TB.lowpass_flow(np.interp(fi, np.arange(nb), udc) + np.maximum(ug, 0.0), fs_sim)
     ag_s = np.interp(fi, np.arange(nb), ag)
     # 声门源系数随声门外展程度在 log 域插值（Birkholz 2014：声门源增益随声门状态可变）：

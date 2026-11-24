@@ -1,6 +1,6 @@
 {
  "version": "g0",
- "n_params": 570,
+ "n_params": 571,
  "area_function_source": "Story 2008 JASA 123:327 Table I (male, 44 sections); a<-[ɑ], o<-[o], e<-[ʌ], i<-[i], u<-[u], ü constructed [i]1-41+[u]42-44 (未核实). See specs/g0-seed.md §3. | E/schwa/ii/iii/er: PLACEHOLDER three-zone model (未核实)",
  "params": [
   {
@@ -1318,6 +1318,15 @@
    "min": -3.0,
    "max": 2.0,
    "default": -1.2,
+   "shape": []
+  },
+  {
+   "name": "artic_tau_ms",
+   "meaning": "发音器官惯性：面积函数、软腭口与声门面积轨迹的临界阻尼二阶平滑时间尺度（两级一阶低通，各 τ/2；避免关键帧同时刻跳变造成爆音）",
+   "unit": "ms",
+   "min": 1.0,
+   "max": 20.0,
+   "default": 10.0,
    "shape": []
   }
  ]

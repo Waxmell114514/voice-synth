@@ -27,14 +27,17 @@ V_LP_HZ = 500.0        # 质点速度低通截止（S1）
 
 
 def dc_flow(A, Avp, ag, p_sub_pa, closure_area):
-    """每帧的准静态直流流量 U_DC（cm³/s）与口腔最窄有效面积。A[nf, N] cm²。"""
-    ac = np.maximum(A.min(axis=1) - closure_area, 0.0) + np.maximum(Avp, 0.0)
+    """每帧的准静态直流流量 U_DC（cm³/s）与经口腔一路的份额（口、鼻并联，同压降下流量按面积分配）。
+    A[nf, N] cm²。"""
+    ao = np.maximum(A.min(axis=1) - closure_area, 0.0)
+    ac = ao + np.maximum(Avp, 0.0)
+    frac_oral = np.where(ac > 1e-9, ao / np.maximum(ac, 1e-9), 0.0)
     ag = np.maximum(ag, 0.0)
     p = p_sub_pa * 10.0
     u = np.zeros(len(ac))
-    ok = (ac > 0) & (ag > 0)
+    ok = (ac > 1e-9) & (ag > 1e-9)
     u[ok] = np.sqrt(2.0 * p / RHO) / np.sqrt(1.0 / ag[ok] ** 2 + 1.0 / ac[ok] ** 2)
-    return u, ac
+    return u, frac_oral
 
 
 def stevens_amp(u, a, re_crit, p_sub_pa):
