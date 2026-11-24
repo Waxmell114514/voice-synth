@@ -2,3 +2,5 @@
 {"time": "2026-11-24T08:46:26", "experiment": "g001-e00", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "92708b7b47f4c0fb"}
 {"time": "2026-11-24T09:23:44", "experiment": "g001-e00s", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "98f95241f950877c"}
 {"time": "2026-11-24T09:52:19", "experiment": "g001-e06", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "9fcde9f4018143f6"}
+{"time": "2026-11-24T10:12:37", "experiment": "g001-e07", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "2f7ec6acdb40dd50"}
+{"time": "2026-11-24T10:18:38", "experiment": "g001-e01", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "45a6d7d199b7c014"}
