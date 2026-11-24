@@ -1,0 +1,5 @@
+{"id": "g001-e07b", "parent": "g001-e00s", "milestone": "M1",
+ "hypothesis": "e07a + constrict() 达到设定的闭塞 / 收紧面积（修复 g0 起就存在的闭塞不完全）；使能型改动，按提案 002-B 不调参，用 g001-e00s 的参数，新参数取默认值",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "与 g001-e00s 相同（0.0266 ± 0.002），孤立元音无辅音",
+   "context_failures": "< 8/138", "T3.cer": "低于 e07a"},
+ "written_before_eval": true}

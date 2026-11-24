@@ -1,0 +1,5 @@
+{"id": "g001-e07a", "parent": "g001-e00s", "milestone": "M1",
+ "hypothesis": "按气流计算的湍流噪声源（不含 constrict() 改动）；使能型改动，按提案 002-B 不调参，用 g001-e00s 的参数，新参数取默认值",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "与 g001-e00s 相同（0.0266 ± 0.002），孤立元音无辅音",
+   "context_failures": "< 8/138", "T3.cer": "方向不确定（d/t 闭塞仍漏气）"},
+ "written_before_eval": true}
