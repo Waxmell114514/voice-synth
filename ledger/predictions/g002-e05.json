@@ -1,0 +1,18 @@
+{
+ "id": "g002-e05",
+ "parent": "g002-e01-branch",
+ "milestone": "M1",
+ "hypothesis": "把 g002-e01 的模态底座换成由女声 MRI 求出的模态：按 Story 2018 第 II 节的步骤（3 点平滑、首段设 0.5 cm²、转等效直径、PCA），从 Story, Titze & Hoffman 1998 被试 DJ 的 10 个元音面积函数（重采样到 44 段归一化位置）求出 Ω_F、φ1_F、φ2_F，替换由男性模态按 CT 标志点变形得到的 Story 2018 女性版表格。生成公式、唇口、舌背收紧都不变。",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "相对 g002-e01 的 0.0429：−0.008（区间 +0.005 到 −0.018），不确定性大",
+  "penalty": "< 0.005 保持：DJ 自己的元音都在罚项区间内，模态空间更贴近罚项的参照",
+  "pinning": "q1_i、q1_v 预计离开下限：新的 q 范围由 DJ 投影的极值外扩得到，DJ 的 /i/ 本身就在样本里。lip_area_a、q2_a 是否离开边界不作预测。总贴边数从 9 降到 4–7",
+  "context_failures": "合并 e07c 后 0–2/138",
+  "T3.cer": "与合并后的 e01 持平（±0.02）",
+  "warm_start": "无法精确复现父版本（基底不同）。替代做法：把父版本各元音生成的面积函数用最小二乘投影到新基底得到 q 初值，Implementer 报告投影残差（对数面积 RMS）和投影后、调参前的 T1"
+ },
+ "compare_to": "g002-e00p（重测于含 e07c 的主线）；e02、e05 另与 g002-e01 比",
+ "source": "reports/gen_002_plan.json",
+ "written_before_eval": true
+}

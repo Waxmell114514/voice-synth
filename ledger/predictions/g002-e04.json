@@ -1,0 +1,18 @@
+{
+ "id": "g002-e04",
+ "parent": "main",
+ "milestone": "M1",
+ "hypothesis": "唇端辐射改为随唇口面积变化的频变反射：常数 −r_lip 换成一阶无源反射滤波 R(z; A_lip)，形式为 Flanagan 活塞辐射阻抗（R_r 与 L_r 并联，均由唇口半径 a = √(A_lip/π) 决定），只引入一个无量纲惯量系数 κ_rad。κ_rad = 0 时 R ≡ −r_lip。",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "相对 e00p 的 0.0175：−0.002（区间 +0.003 到 −0.006），从 e00p 热启动",
+  "penalty": "0.0054 → 0.004–0.006。/a/ 大唇口的辐射损耗由物理决定，/a/ 唇区面积不必再贴 9 cm² 上限，/a/ 的 max_area 项可能下降",
+  "pinning": "r_lip 离开上限 0.995（变为高频极限，低频反射由滤波器给出）。κ_rad 预计落在文献区间 0.6–0.85 内，不贴边。wall_loss 不作预测",
+  "context_failures": "0/138 保持，语境偏差 0.0277 → 0.024–0.028",
+  "T3.cer": "方向不定：高频辐射增强会改变擦音、塞音噪声的谱倾斜，幅度在 ±0.02 内",
+  "dynamic_checks": "辐射滤波器状态必须计入存储能量，或用波数字滤波器（WDF）式的无源结构实现，保证零输入能量逐采样不增；A_lip 随时间变化时滤波系数的切换不得产生咔哒（对照 velum、vowels 序列与父版本比）"
+ },
+ "compare_to": "g002-e00p（重测于含 e07c 的主线）；e02、e05 另与 g002-e01 比",
+ "source": "reports/gen_002_plan.json",
+ "written_before_eval": true
+}

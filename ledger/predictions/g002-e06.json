@@ -1,0 +1,18 @@
+{
+ "id": "g002-e06",
+ "parent": "main",
+ "milestone": "M1",
+ "hypothesis": "辅音收紧改用 Story 2005 Tier II 的乘法叠加（Eq.1、5–9，带偏斜 s_c 和激活量 m_c；m_c > 1 时把闭塞摊开），取代现在 gestures.constrict() 的加法混合 base·(1−m) + area·m 再取 min。部位和宽度按规格第 6 节的 Story Table I 换算，收紧两侧保留元音形状的比例 V(i)/V(l_c)。属于使能型改动（提案 002-B）：孤立元音 T1 不受影响，不调参，直接用 e00p 的参数评估。",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "0（T1 的 a1、o1、e1、yi1、wu1、yu1 都没有声母、没有韵尾，不经过 constrict()；|ΔT1| < 0.0005）",
+  "penalty": "不变（0.0054，元音参数没改）",
+  "pinning": "不新增调参参数（s_c、m_c 取 Story Table I 文献值，在 schema 中声明，本代不调）",
+  "context_failures": "0/138 保持。语境偏差 0.0277 → 0.023–0.027，/ü/（j、q、x 语境）0.051 → 0.040–0.048：收紧释放后不再把元音面积拉向收紧面积的加法混合",
+  "T3.cer": "−0.02（区间 +0.01 到 −0.05），相对 e00p 在主线上的 T3：部位线索（l_c、r_c、s_c 来自 MRI）更接近真实，塞音被听成零声母的比例下降",
+  "dynamic_checks": "mixed、velum 序列的咔哒比不高于父版本；能量检查不受影响（只改面积目标）"
+ },
+ "compare_to": "g002-e00p（重测于含 e07c 的主线）；e02、e05 另与 g002-e01 比",
+ "source": "reports/gen_002_plan.json",
+ "written_before_eval": true
+}

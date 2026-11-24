@@ -1,0 +1,18 @@
+{
+ "id": "g002-e03",
+ "parent": "main",
+ "milestone": "M1",
+ "hypothesis": "按截面积分布的边界层损耗，用无状态、可证无源的形式：每段行波衰减由全局常数 μ 改为 μ_k = wall_loss + k_bl·(周长/面积)_k，其中周长/面积 = 2√(π/A_k)，即 ∝ 1/√A_k。系数在一个参考频率上取值，所以仍是逐段的标量增益 g_k = 1 − μ_k ∈ [0,1]，不加任何滤波器状态。",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "相对 e00p 的 0.0175：−0.002（区间 +0.002 到 −0.005），从 e00p 热启动",
+  "penalty": "0.0054 → 0.004–0.006。/i/、/ü/ 不必再靠扭曲形状来展宽带宽，罚项可能略降，但单靠本机制不保证过线",
+  "pinning": "wall_loss 离开上限 0.01：均匀损耗只剩一小部分，损耗集中到窄收紧处。r_glottis（1.0）、r_lip（0.995）可能也会离开边界，但不作预测。/a/、/i/ 的 9 cm² 面积上限预计仍贴边（自由面积的问题不由本机制解决）",
+  "context_failures": "0/138 保持。语境偏差 0.0277 → 0.022–0.026，/ü/ 0.051 下降最多（见 rationale）",
+  "T3.cer": "基本不变（±0.01）",
+  "dynamic_checks": "能量逐采样不增必须严格通过：g_k ≤ 1 且无状态，按构造无源。低损耗角点把 k_bl 置 0（名字须含 loss，使 dynamic_t0_check 自动置零）"
+ },
+ "compare_to": "g002-e00p（重测于含 e07c 的主线）；e02、e05 另与 g002-e01 比",
+ "source": "reports/gen_002_plan.json",
+ "written_before_eval": true
+}
