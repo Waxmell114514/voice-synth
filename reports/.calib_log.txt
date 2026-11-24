@@ -1,29 +1,0 @@
-07:11:30 T1 stats
-07:11:32 t1 pool 0 2549
-07:12:13 t1 pool 300 2549
-07:12:50 t1 pool 600 2549
-07:13:31 t1 pool 900 2549
-07:14:08 t1 pool 1200 2549
-07:14:44 t1 pool 1500 2549
-07:15:22 t1 pool 1800 2549
-07:16:06 t1 pool 2100 2549
-07:16:48 t1 pool 2400 2549
-Loading weights:   0%|          | 0/211 [00:00<?, ?it/s]Loading weights: 100%|██████████| 211/211 [00:00<00:00, 13347.78it/s]
-Loading weights:   0%|          | 0/248 [00:00<?, ?it/s]Loading weights: 100%|██████████| 248/248 [00:00<00:00, 10554.71it/s]
-07:19:42 refpool done
-07:19:44 dev human features
-07:20:24 asr paraformer
-07:21:17 asr sensevoice
-Loading weights:   0%|          | 0/222 [00:00<?, ?it/s]Loading weights: 100%|██████████| 222/222 [00:00<00:00, 3506.85it/s]
-07:21:57 mos utmos22
-Loading weights:   0%|          | 0/3351 [00:00<?, ?it/s]Loading weights:  11%|█▏        | 380/3351 [00:00<00:00, 3792.34it/s]Loading weights:  23%|██▎       | 760/3351 [00:00<00:00, 3450.20it/s]Loading weights:  33%|███▎      | 1122/3351 [00:00<00:00, 3522.41it/s]Loading weights:  44%|████▍     | 1476/3351 [00:00<00:00, 3430.93it/s]Loading weights:  54%|█████▍    | 1821/3351 [00:00<00:00, 3235.03it/s]Loading weights:  65%|██████▍   | 2168/3351 [00:00<00:00, 3307.47it/s]Loading weights:  75%|███████▌  | 2516/3351 [00:00<00:00, 3361.17it/s]Loading weights:  85%|████████▌ | 2854/3351 [00:00<00:00, 3348.23it/s]Loading weights:  95%|█████████▌| 3190/3351 [00:00<00:00, 3141.65it/s]Loading weights: 100%|██████████| 3351/3351 [00:01<00:00, 3324.30it/s]
-07:26:37 mos utmosv2
-07:27:29 det aasist
-Loading weights:   0%|          | 0/215 [00:00<?, ?it/s]Loading weights: 100%|██████████| 215/215 [00:00<00:00, 3375.62it/s]
-07:28:01 det w2v-deepfake
-07:28:33 ssl chinese-hubert-base
-07:29:05 ssl wavlm-base-plus
-07:29:06 dev espeak features
-07:29:28 asr paraformer
-07:29:57 asr sensevoice
-07:30:33 mos utmos22
