@@ -17,7 +17,7 @@ echo "[$ID] T0"
 python3 eval/t0.py params/g0.json > "$OUT/$ID.t0.json"
 python3 -c "import json,sys;d=json.load(open('$OUT/$ID.t0.json'));sys.exit(0 if d['pass'] else 2)" || { echo "[$ID] T0 FAIL"; exit 2; }
 echo "[$ID] 调参"
-EVAL_SYNTH_WORKERS=2 python3 tools/optimize.py --parent params/g0.json --out "params/$ID.json" --milestone "$MS" --seed 1 \
+EVAL_SYNTH_WORKERS=2 python3 tools/optimize.py --parent "${PARENT:-params/g0.json}" --out "params/$ID.json" --milestone "$MS" --seeds "${SEEDS:-1,2,3}" --budget "${BUDGET:-450}" \
   > "$OUT/$ID.opt.json" 2> "$OUT/$ID.opt.log"
 cp "params/$ID.json" "$OUT/$ID.params.json"
 echo "[$ID] 开发集评估"

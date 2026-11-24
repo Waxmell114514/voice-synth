@@ -12,7 +12,9 @@ generation:
   stall_generations: 6
 optimizer:
   method: cma-es
-  evals_per_variant: 150
+  evals_per_variant: 450         # 人批准（提案 002-A，2026-11-24）：3 个种子 × 150，取中位数
+  seeds_per_variant: 3           # 种子 1,2,3，事先固定；结果取中位数那次
+  warm_start: true               # 各分支从已调好的对照组起步，新参数默认值须等同父版本
   dev_subset_sentences: 30
 eval_quota_per_experiment: 2
 param_cap: 3000

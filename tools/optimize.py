@@ -127,7 +127,9 @@ def main():
     ap.add_argument("--milestone", default="M1")
     ap.add_argument("--budget", type=int, default=None)
     ap.add_argument("--sigma", type=float, default=0.15)
-    ap.add_argument("--seed", type=int, default=1, help="优化器随机种子；正式结果固定用 1，其余只用于估计优化器噪声")
+    ap.add_argument("--seed", type=int, default=1, help="单种子模式的随机种子")
+    ap.add_argument("--seeds", default=None,
+                    help="多种子模式（提案 002-A）：例如 1,2,3；每个种子各用 budget/种子数 次，结果取中位数那次")
     ap.add_argument("--mode", default="separable", choices=["separable", "joint"],
                     help="M1 默认用可分搜索（2026-11-24 起；此前 g001-e00、g001-e00r 用 joint）")
     a = ap.parse_args()
@@ -146,6 +148,29 @@ def main():
     f = objective_fn(a.milestone, tgt["tiers"])
     tmp = tempfile.mkdtemp(prefix="opt_")
     t0 = time.time()
+    if a.seeds:
+        seeds = [int(x) for x in a.seeds.split(",")]
+        per = budget // len(seeds)
+        runs = []
+        for sd in seeds:
+            o = a.out + f".seed{sd}.json"
+            cmd = [sys.executable, __file__, "--parent", a.parent, "--out", o, "--milestone", a.milestone,
+                   "--budget", str(per), "--seed", str(sd), "--mode", a.mode, "--sigma", str(a.sigma)]
+            import subprocess
+            subprocess.run(cmd, check=True)
+            runs.append((json.load(open(o)), o))
+        runs.sort(key=lambda r: r[0]["optimizer"]["best_objective"])
+        med, med_path = runs[len(runs) // 2]
+        out = dict(med)
+        out["version"] = os.path.splitext(os.path.basename(a.out))[0]
+        out["optimizer"] = dict(med["optimizer"], protocol="002-A multi-seed median", seeds=seeds,
+                                per_seed_best={r[0]["optimizer"]["seed"]: r[0]["optimizer"]["best_objective"] for r in runs},
+                                chosen_seed=med["optimizer"]["seed"], total_evals=sum(r[0]["optimizer"]["evals"] for r in runs))
+        json.dump(out, open(a.out, "w"), ensure_ascii=False, indent=1)
+        for _, o in runs:
+            os.remove(o)
+        print(json.dumps(out["optimizer"]))
+        return
     if a.milestone == "M1" and a.mode == "separable":
         fd = objective_fn(a.milestone, tgt["tiers"], with_diag=True)
         f0, _ = fd(vals, tmp)
@@ -154,7 +179,7 @@ def main():
         if f0 <= bf:
             bf, bv, bat = f0, vals, 1
         out = {"version": os.path.splitext(os.path.basename(a.out))[0], "parent": os.path.basename(a.parent),
-               "optimizer": {"method": "cma-es", "mode": "separable", "milestone": a.milestone, "evals": n,
+               "optimizer": {"method": "cma-es", "mode": "separable", "milestone": a.milestone, "evals": n, "seed": a.seed,
                              "budget": budget, "start_objective": f0, "best_objective": bf, "best_at_eval": bat,
                              "dims": sp.dim, "trace_gen_best": [round(f0, 5)] + trace,
                              "wall_min": round((time.time() - t0) / 60, 1)},

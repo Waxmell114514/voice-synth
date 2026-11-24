@@ -1,0 +1,5 @@
+{"id": "g002-e00", "parent": "g001-e00s", "milestone": "M1",
+ "hypothesis": "第 2 代对照组（提案 002-A）：不改结构，从 g001-e00s 热启动，按元音分块 CMA-ES，种子 1,2,3 各 150 次，取中位数",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "0.022 ± 0.005（从 0.0266 起步，再降一些）",
+                "seed_spread": "3 个种子的最好值相差 < 0.006"},
+ "written_before_eval": true}
