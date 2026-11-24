@@ -1,0 +1,13 @@
+[
+ {
+  "id": "g000-e00",
+  "params": "params/g0.json",
+  "scores": {
+   "T1.formant_rel_error": 0.14886,
+   "T2.syllable_acc": 0.07472,
+   "T2.tone_acc": 0.094,
+   "T3.cer": 0.89333,
+   "T4.composite": 0.05269
+  }
+ }
+]
