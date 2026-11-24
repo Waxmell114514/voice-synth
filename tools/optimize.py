@@ -149,6 +149,9 @@ def main():
     extra = [p for p in schema["params"] if a.milestone in p.get("tune", [])]
     arrays = tgt["arrays"] + [p["name"] for p in extra if p["shape"] and p["name"] not in tgt["arrays"]]
     scalars = tgt["scalars"] + [p["name"] for p in extra if not p["shape"] and p["name"] not in tgt["scalars"]]
+    inactive = {p["name"] for p in schema["params"] if p.get("inactive")}   # 被新机制取代、不再起作用的参数不调
+    arrays = [x for x in arrays if x not in inactive]
+    scalars = [x for x in scalars if x not in inactive]
     sp = Space(schema, vals, arrays, scalars)
     f = objective_fn(a.milestone, tgt["tiers"])
     tmp = tempfile.mkdtemp(prefix="opt_")
