@@ -6,6 +6,7 @@ set -euo pipefail
 MAIN="$(cd "$(dirname "$0")/.." && pwd)"
 WT="$(cd "$1" && pwd)"; ID="$2"; MS="${3:-M1}"; TIERS="${4:-T0,T1,T3}"
 OUT="$MAIN/reports/evals"; mkdir -p "$OUT"
+[ "$WT" = "$MAIN" ] && { echo "[$ID] 拒绝：worktree 不能是主仓库本身（会把 ledger/eval_calls.jsonl 链接到自己，2026-11-24 事故）"; exit 4; }
 for d in data models tools; do [ -e "$WT/eval/$d" ] || ln -s "$MAIN/eval/$d" "$WT/eval/$d"; done
 mkdir -p "$WT/ledger"
 [ -L "$WT/ledger/eval_calls.jsonl" ] || { rm -f "$WT/ledger/eval_calls.jsonl"; ln -s "$MAIN/ledger/eval_calls.jsonl" "$WT/ledger/eval_calls.jsonl"; }
