@@ -1,0 +1,18 @@
+{
+ "params": "/home/user/voice-synth/params/g001-e00s.json",
+ "context_formant_rel_error": {
+  "mean": 0.03195,
+  "std": 7e-05
+ },
+ "per_vowel_mean": {
+  "a": 0.0394,
+  "o": 0.0266,
+  "e": 0.0138,
+  "i": 0.0161,
+  "u": 0.0383,
+  "v": 0.0562
+ },
+ "n_syllables": 138,
+ "measure_failures": 0,
+ "note": "非正式独立检查：语境音节未参与优化"
+}
