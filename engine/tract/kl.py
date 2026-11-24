@@ -89,6 +89,11 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             b[k] = g * nb_[k]
             if want_energy:
                 e += A[blk, k] * (f[k] * f[k] + b[k] * b[k])
+        if avp <= 0.0:
+            # 软腭关闭：腭咽口段面积为 0，不进能量和；必须清零，否则它会积累口腔压力，
+            # 开启瞬间释放成爆音（Critic 对 g001-fix01 的审查）
+            nfn[0] = 0.0
+            nbn[0] = 0.0
         for k in range(Nn):
             fn[k] = g * nfn[k]
             bn[k] = g * nbn[k]
