@@ -32,20 +32,25 @@ def area_targets():
     p = os.path.join(REPO, "specs", "g0_area_functions.json")
     if os.path.exists(p):
         d = json.load(open(p, encoding="utf-8"))
-        return {k: np.interp(np.linspace(0, 1, N), np.linspace(0, 1, len(v)), v) for k, v in d["areas"].items()}, d.get("source", "")
+        lit = {k: np.interp(np.linspace(0, 1, N), np.linspace(0, 1, len(v)), v) for k, v in d["areas"].items()}
+    else:
+        lit, d = {}, {}
     placeholder = {
         "a": three_zone(0.8, 2.5, 5.0, 4.0, 0.3, 0.6), "o": three_zone(2.0, 2.0, 3.0, 0.8, 0.55, 0.9),
         "e": three_zone(2.5, 2.5, 2.5, 2.0, 0.6, 1.0), "i": three_zone(6.0, 4.0, 0.4, 2.0, 0.78, 0.3),
         "u": three_zone(5.0, 0.6, 3.0, 0.3, 0.62, 0.4), "v": three_zone(6.0, 4.0, 0.5, 0.5, 0.78, 0.35),
         "E": three_zone(4.0, 3.0, 1.2, 2.5), "schwa": np.full(N, 2.5), "ii": three_zone(3.0, 3.0, 1.5, 2.0, 0.9, 0.5),
         "iii": three_zone(3.0, 2.5, 1.0, 2.0, 0.85, 0.6), "er": three_zone(2.5, 2.0, 1.0, 2.0, 0.82, 0.5)}
-    return placeholder, "PLACEHOLDER three-zone model (未核实)"
+    out = {**placeholder, **lit}
+    src = (d.get("source", "") + " | ") if lit else ""
+    src += "E/schwa/ii/iii/er: PLACEHOLDER three-zone model (未核实)" if lit else "PLACEHOLDER three-zone model (未核实)"
+    return out, src
 
 
 def main():
     areas, src = area_targets()
     # ---- 说话人 / 声道
-    P("tract_length_cm", "声道长度（声门到唇）", "cm", 12.0, 19.0, 14.8)
+    P("tract_length_cm", "声道长度（声门到唇）", "cm", 12.0, 19.0, 14.5)
     P("min_area", "面积函数下限（避免除零，闭塞仍保留极小面积）", "cm^2", 0.001, 0.05, 0.005)
     P("r_glottis", "声门端压力波反射系数", "1", 0.5, 1.0, 0.85)
     P("r_lip", "唇端压力波反射系数的模（开端反射为 -r_lip）", "1", 0.5, 0.995, 0.92)
