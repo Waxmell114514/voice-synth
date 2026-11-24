@@ -49,7 +49,7 @@ def engine_areas(vals, params_path=None):
                 sys.path.insert(0, os.getcwd())
             from engine.control.story_modes import export_vowel_areas
             out = dict(vals)
-            out.update({k: list(v) for k, v in export_vowel_areas(params_path).items()})
+            out.update({(k if k.startswith("area_") else f"area_{k}"): list(v) for k, v in export_vowel_areas(params_path).items()})
             return out
         except ImportError:
             pass
