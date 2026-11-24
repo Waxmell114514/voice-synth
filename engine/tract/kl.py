@@ -4,6 +4,10 @@
 即每段每方向一个采样延迟。鼻腔 Nn 段，段长同为 Δ，在口腔第 kv 段与第 kv+1 段之间
 经软腭口（面积 A_vp）以三端口并联结点耦合；A_vp = 0 时退化为普通两端口结点。
 
+鼻腔第 0 段即腭咽口管段，其面积取 A_vp(t)（An[0] 不用）：口腔三端口结点、鼻腔 k=0 结点
+（A_vp ↔ An[1]）与能量和都用同一个 A_vp，功率守恒一致。A_vp → 0 时鼻腔 k=0 结点对鼻腔侧
+刚性反射，鼻孔输出连续地趋于 0，口腔结点连续地退化为两端口（g001-e06，specs/g001-e06.md §3）。
+
 结点（并联，功率守恒）：pJ = 2 Σ A_i p_i^in / Σ A_i，p_i^out = pJ − p_i^in。
 声门端：f0_new = r_g·b0 + 激励；唇端：b_{N-1,new} = −r_lip·f_{N-1}；鼻孔端同理（−r_nose）。
 壁面损耗：每个采样所有行波乘 (1−μ)。
@@ -23,7 +27,7 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
     """
     n        仿真采样数
     block    控制块长度（采样）；A[nb, N]、Avp[nb]、nidx[nb]、ngain[nb] 每块一组
-    An[Nn]   鼻腔面积（固定）
+    An[Nn]   鼻腔面积（固定；An[0] 不用，第 0 段面积 = Avp）
     ug[n]    声门处注入（体积速度，已含送气噪声）
     noise[n] 湍流噪声源（单位方差），在 nidx 段下游注入，增益 ngain
     f,b,fn,bn  初始状态（就地更新）
@@ -45,12 +49,13 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             blk = A.shape[0] - 1
         # 声门端
         nf[0] = r_g * b[0] + ug[t] / A[blk, 0]
+        avp = Avp[blk] if Avp[blk] > 0.0 else 0.0
         # 口腔结点
         for k in range(N - 1):
             a1 = A[blk, k]
             a2 = A[blk, k + 1]
-            if k == kv and Avp[blk] > 0.0:
-                a3 = Avp[blk]
+            if k == kv:
+                a3 = avp  # 腭咽口（鼻腔第 0 段）面积；a3 = 0 时精确退化为两端口
                 pj = 2.0 * (a1 * f[k] + a2 * b[k + 1] + a3 * bn[0]) / (a1 + a2 + a3)
                 nf[k + 1] = pj - b[k + 1]
                 nb_[k] = pj - f[k]
@@ -59,11 +64,9 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
                 pj = 2.0 * (a1 * f[k] + a2 * b[k + 1]) / (a1 + a2)
                 nf[k + 1] = pj - b[k + 1]
                 nb_[k] = pj - f[k]
-        if Avp[blk] <= 0.0:
-            nfn[0] = bn[0]  # 软腭关闭：鼻腔入口为闭端（压力反射 +1）
-        # 鼻腔结点
+        # 鼻腔结点（第 0 段面积 = 腭咽口 Avp；a2 = An[1] > 0，分母恒正）
         for k in range(Nn - 1):
-            a1 = An[k]
+            a1 = avp if k == 0 else An[k]
             a2 = An[k + 1]
             pj = 2.0 * (a1 * fn[k] + a2 * bn[k + 1]) / (a1 + a2)
             nfn[k + 1] = pj - bn[k + 1]
@@ -90,7 +93,7 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             fn[k] = g * nfn[k]
             bn[k] = g * nbn[k]
             if want_energy:
-                e += An[k] * (fn[k] * fn[k] + bn[k] * bn[k])
+                e += (avp if k == 0 else An[k]) * (fn[k] * fn[k] + bn[k] * bn[k])
         if want_energy:
             en[t] = e
     return ul, un, en
