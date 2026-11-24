@@ -27,7 +27,7 @@ python3 tools/context_vowel_check.py "params/$ID.json" > "$OUT/$ID.context.json"
 python3 - "$OUT" "$ID" <<'EOF'
 import json, sys
 o, i = sys.argv[1], sys.argv[2]
-d = json.load(open(f"{o}/{i}.dev.json")); c = json.load(open(f"{o}/{i}.context.json")); p = json.load(open(f"{o}/{i}.opt.json"))
+d = json.load(open(f"{o}/{i}.dev.json")); c = json.load(open(f"{o}/{i}.context.json")); p = json.loads(open(f"{o}/{i}.opt.json").read().strip().splitlines()[-1])
 print(json.dumps({"id": i, "opt_best": p["best_objective"], "scores": {k: v["mean"] for k, v in d["scores"].items()},
                   "T1_std": d["scores"]["T1.formant_rel_error"]["std"], "context": c["context_formant_rel_error"]["mean"],
                   "context_failures": c["measure_failures"]}, ensure_ascii=False))
