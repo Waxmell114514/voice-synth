@@ -1,0 +1,51 @@
+{
+ "system": "engine",
+ "set": "dev",
+ "suite": "dev",
+ "seeds": [
+  0,
+  1,
+  2
+ ],
+ "tiers": [
+  "T0",
+  "T1",
+  "T3"
+ ],
+ "params_sha256": "1967b5d40bc5bd48",
+ "T0": {
+  "uniform_tube": {
+   "pass": true,
+   "peaks_hz": [
+    500.0,
+    1500.0,
+    2500.0
+   ],
+   "target_hz": [
+    500.0,
+    1500.0,
+    2500.0
+   ],
+   "tol": 0.02
+  },
+  "energy_decay": {
+   "pass": false,
+   "error": "energy increased",
+   "seed": 0,
+   "max_rel_increase": 0.04291356559469479
+  },
+  "bounds": {
+   "pass": true,
+   "corners_tested": 6,
+   "failures": []
+  },
+  "determinism": {
+   "pass": true,
+   "reproducible": true,
+   "sample_rate": 22050,
+   "seed_changes_output": true
+  },
+  "pass": false,
+  "real_time_factor": 1.024
+ }
+}
