@@ -49,6 +49,7 @@ def constrict(base, place_frac, width, area, mode="min"):
     c = (N - 1) * (1.0 - place_frac)
     k = np.arange(N)
     m = np.exp(-0.5 * ((k - c) / max(width, 0.3)) ** 2)
+    m = m / m.max()   # 最窄处恰好达到给定面积（c 非整数时高斯峰不在段中心；g001-e07：噪声电平依赖实际收紧面积）
     tgt = base * (1 - m) + area * m
     return np.minimum(base, tgt) if mode == "min" else tgt
 
