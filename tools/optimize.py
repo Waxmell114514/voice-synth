@@ -6,6 +6,7 @@
   - 数组参数（面积函数）用对数面积上的低阶余弦模态扰动：log A' = log A + Σ_m c_m cos(π m x)，
     m = 0..K-1；优化的是 c_m，写回的是 A'（仍是已声明参数，并裁剪到其范围）。
   - 标量参数在 [min, max] 上线性归一化到 [0,1]。
+另外，schema 条目若声明 "tune": ["M1"]，自动加入该里程碑的搜索空间。
 目标函数：当前里程碑的主指标（开发集固定子集 --set opt，seed 0），前序里程碑指标作罚项。
 """
 import os, sys, json, time, argparse, tempfile, copy
@@ -87,7 +88,11 @@ def main():
     par = load(a.parent)
     vals = {p["name"]: par["values"].get(p["name"], p["default"]) for p in schema["params"]}
     tgt = TARGETS[a.milestone]
-    sp = Space(schema, vals, tgt["arrays"], tgt["scalars"])
+    # schema 条目可声明 "tune": ["M1", ...]，自动纳入该里程碑的搜索空间（新机制的参数与对照组同等调参）
+    extra = [p for p in schema["params"] if a.milestone in p.get("tune", [])]
+    arrays = tgt["arrays"] + [p["name"] for p in extra if p["shape"] and p["name"] not in tgt["arrays"]]
+    scalars = tgt["scalars"] + [p["name"] for p in extra if not p["shape"] and p["name"] not in tgt["scalars"]]
+    sp = Space(schema, vals, arrays, scalars)
     f = objective_fn(a.milestone, tgt["tiers"])
     tmp = tempfile.mkdtemp(prefix="opt_")
     t0 = time.time()

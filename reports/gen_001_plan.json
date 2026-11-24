@@ -1,0 +1,74 @@
+[
+ {
+  "id": "g001-e01",
+  "hypothesis": "女性非均匀轴向比例：把元音面积函数从男→女的均匀 0.85 缩放改为分区轴向重采样（喉/咽段压缩、口腔段伸长，以每个元音的咽/口分界为折点），即在面积函数之上增加一个沿声道轴的分段线性坐标变换",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.015（区间 -0.005 ~ -0.025，相对调参后的对照 g001-e00）"},
+  "parent": "g000-e00",
+  "touched_modules": ["control", "tract"],
+  "spec_needed": true,
+  "spec_request": "Story 2008 [ɑ o ʌ i u] 44 段面积函数中咽/口分界（悬雍垂尖或软腭后缘）所在段号；女/男分区长度比（Story, Hoffman & Titze 1997 Table 1/2 已核实：喉 0.77、咽 0.63、口 1.05），并补 Fitch & Giedd 1999 或 Vorperian 等 2011 的成年女性咽/口长度比及个体差异范围，用于 schema 取值范围",
+  "rationale": "g0 实测共振峰（脉冲响应与 Praat 一致）为 /a/ 811/1237/3613 Hz、/i/ F3 3563、/e/ F3 3721，对照女声目标 995/1605/2622、3220、2981：F1/F2 偏低而 F3 偏高，正是男性比例（咽长、口短）的特征，女性咽短会抬高后腔相关的 F1/F2，口长会压低前腔相关的 F3。优化器的 6 个对数面积余弦模态只改截面、不能改轴向长度分配，tract_length_cm 又只能整体等比缩放，所以这是新的几何自由度；实现上在 render 前对每个元音目标做一次插值即可，均匀管经变换仍是均匀管，T0 不受影响。新增约 13 个标量（2 个分区比 + 每元音折点），须加入 tools/optimize.py 的 M1 TARGETS。",
+  "targets_worst_diagnostic": true,
+  "exploratory": false
+ },
+ {
+  "id": "g001-e02",
+  "hypothesis": "开相声源-声道耦合：声门端反射系数由常数 r_glottis 改为随 LF 周期变化的 r_g(t)，按声门面积波形（由 LF 气流导出）计算声门阻抗 Zg(t) 与第 1 段特性阻抗的失配，开相时声门部分开放、闭相时近似全反射",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.006（区间 0 ~ -0.012）"},
+  "parent": "g000-e00",
+  "touched_modules": ["source", "tract"],
+  "spec_needed": true,
+  "spec_request": "女性声门最大面积与开商（Ag_max 约 0.1–0.2 cm²，未核实）；声门阻抗公式（Ishizaka & Flanagan 1972 的黏滞项 + 动能项，或 Fant 1982 / Ananthapadmanabha & Fant 1982 的线性化声门电阻）；女性声门下压（约 6–10 cmH2O）；开相使 F1 上移、B1 变宽的文献量级，用于核对实现",
+  "rationale": "高元音 F1 全部偏低（/i/ 312 vs 369、/u/ 360 vs 400、/ü/ 288 vs 360，/i/ F1 为最差项之一），这些低 F1 管道接近闭端 Helmholtz 共振，对声门端终端最敏感；真实声门在开相部分开放，会把 F1 抬高、B1 变宽，女声开商大，效应比男声强。T0 钩子用闭合声门（r_g=1），不受影响；只要 |r_g(t)| ≤ 1，能量单调不增的性质仍然成立。新增 3–4 个参数（Ag_max、声门下压、黏滞/动能系数），需加入 M1 TARGETS。",
+  "targets_worst_diagnostic": true,
+  "exploratory": false
+ },
+ {
+  "id": "g001-e03",
+  "hypothesis": "按姿态可变的声道长度：每个元音目标带自己的喉位/唇突长度，声道以固定段长 Δ 和最大段数实现，有效长度由激活段数加声门端一段分数延迟（线性插值或一阶全通）决定，取代全句单一 tract_length_cm",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.006（区间 -0.002 ~ -0.012）"},
+  "parent": "g000-e00",
+  "touched_modules": ["tract", "control"],
+  "spec_needed": true,
+  "spec_request": "可变长度 KL 声道的分数延迟做法（Välimäki & Karjalainen 1994，锥形段与分数延迟滤波；或 Mathur, Story & Rodriguez 2006 的变长波导），重点是长度随时间变化时的能量守恒条件；各元音女性有效声道长度/唇突范围（Story 2008 男性 VTL 16.1–19.6 cm 已核实，需女性或按比例换算的范围）",
+  "rationale": "Story 2008 的元音 VTL 相差 20%（主要来自唇突和喉位），g0 却对所有元音用同一个 14.5 cm，规格 3.2 节已预计这会让各元音的共振峰整体偏移；/e/ 的 F1 与 F3 都偏高（720/3721 vs 584/2981），/i/ /ü/ 的 F3 偏高，这些都需要比其他元音更长的管道，单一全局长度做不到这种逐元音的差别。T0 钩子给定的是显式长度，结构不变；新增每元音一个长度标量（11 个），需加入 M1 TARGETS，并且 M2 的圆唇辅音过渡以后也要用到这个能力。",
+  "targets_worst_diagnostic": true,
+  "exploratory": false
+ },
+ {
+  "id": "g001-e04",
+  "hypothesis": "按截面积分布的频变损耗：用每段一阶低通损耗滤波（系数随 1/√A_k 与周长变化，模拟黏滞与热传导边界层损耗 ∝ √f）取代所有段、所有频率统一的 (1−wall_loss) 衰减",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.003（区间 +0.002 ~ -0.008）"},
+  "parent": "g000-e00",
+  "touched_modules": ["tract"],
+  "spec_needed": true,
+  "spec_request": "Liljencrants 1985 / Story 1995 波反射模型中黏滞与热传导损耗的离散化（每段损耗滤波的系数与截面积、周长、频率的关系），以及女性元音 B1–B3 的实测带宽，用于核对",
+  "rationale": "现在的损耗与频率和截面无关，所有共振峰带宽大致相同，而真实声道的边界层损耗集中在窄收紧处（/i/ /u/ /ü/ 的前腔收紧，/a/ 的咽腔收紧）并随 √f 增大，会改变各共振峰的相对阻尼，并通过阻尼带来轻微的频率下移。这是声道物理本身，不针对测量；均匀 3 cm² 管的频率偏移远小于 T0 的 2% 容差，只要滤波是无源的，能量衰减检验仍然通过。只新增 1–2 个系数，预期收益小，主要价值是让后续的损耗相关机制建立在符合物理的带宽之上。",
+  "targets_worst_diagnostic": false,
+  "exploratory": false
+ },
+ {
+  "id": "g001-e05",
+  "hypothesis": "声门下声道：在声门之后接一段气管/支气管管道（约 10–15 段，远端为吸收性终端），通过由 LF 声门面积驱动的时变声门结点与声道耦合，产生声门下共振（女性 Sg1≈700、Sg2≈1500 Hz 附近）及其与 F1/F2 的相互作用",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.002（区间 +0.005 ~ -0.010）"},
+  "parent": "g000-e00",
+  "touched_modules": ["tract", "source"],
+  "spec_needed": true,
+  "spec_request": "女性气管长度与截面积剖面（Ishizaka, Matsudaira & Kaneko 1976；Lulich 2010 的声门下共振女声值 Sg1/Sg2/Sg3）；气管远端终端（肺）阻抗的简化模型；声门结点耦合公式（与 g001-e02 相同的声门阻抗，可共用其规格）",
+  "rationale": "探索性：声门下共振在开相通过声门与声道耦合，会在 Sg 附近推开或吸引共振峰，并在 F2 区域引入零点。女声 Sg2 约 1500 Hz，正落在 /a/ /e/ 目标 F2（1605/1503）附近，这两个 F2 正是最差诊断，所以效应的方向事先无法确定。T0 钩子是闭合声门，均匀管检验不受影响；对能量检验的风险在于终端须为无源。",
+  "targets_worst_diagnostic": false,
+  "exploratory": true
+ },
+ {
+  "id": "g001-e06",
+  "hypothesis": "随舌位高低变化的软腭口：每个元音目标带自己的腭咽口面积 A_vp（低元音软腭较低、口元音也有少量鼻腔耦合），经已有的鼻腔三端口结点耦合，取代口元音一律 A_vp=0",
+  "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.002（区间 +0.004 ~ -0.008）"},
+  "parent": "g000-e00",
+  "touched_modules": ["control"],
+  "spec_needed": true,
+  "spec_request": "口元音软腭高度/腭咽口面积随元音高度的关系（Moll 1962；Bell-Berti 1980；普通话材料如有更好），口元音 A_vp 的生理范围（规格中的 0.01–0.15 cm² 尚未核实），以及女声低元音中腭咽口开放的程度",
+  "rationale": "探索性：生理上低元音的软腭比高元音低，少量鼻腔耦合会在 /a/ 的 F1 附近引入极零对，并改变 F1/F2 的位置。/a/ 的 F1/F2/F3 三项全部偏离（F3 为最差项），参考又是连续语流（鼻韵尾前后的协同鼻化很常见），这一机制可能对 /a/ 有用，但也可能使测量变差；新增的每元音 A_vp 由优化器调，下限为 0，所以最坏情况大致等于对照组。复用已有鼻腔支路，实现量小；T0 钩子的 Avp=0，不受影响。新增 6–11 个标量，需加入 M1 TARGETS。",
+  "targets_worst_diagnostic": true,
+  "exploratory": true
+ }
+]
