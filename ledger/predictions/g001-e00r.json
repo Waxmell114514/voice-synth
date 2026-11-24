@@ -1,0 +1,6 @@
+{"id": "g001-e00r", "parent": "g000-e00", "milestone": "M1",
+ "hypothesis": "对照组重跑（人批准）：元音面积上限从 12 收紧到 10 cm²，其余与 g001-e00 相同（CMA-ES 150 次、40 维、同一随机种子）",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "0.065 ± 0.01（Critic 在 9.3 cm² 上限下试得 0.064）",
+                "independent_check": "语境元音偏差约 0.06，与 T1 相差不超过 0.015",
+                "plausibility": "所有元音面积 ≤ 10 cm²，/a/ 唇端不再成片钉在上限"},
+ "written_before_eval": true}

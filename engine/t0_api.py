@@ -23,7 +23,7 @@ def tube_impulse_response(area_cm2, length_cm, n_samples):
     ug = np.zeros(n); ug[0] = 1.0
     z = np.zeros(1)
     ul, un, _ = kl_run(n, n, A, np.full(8, 1.0), np.zeros(1), 1, ug, np.zeros(n),
-                       np.full(1, -1, dtype=np.int64), z, 1.0, float(_default("r_lip")), 0.9,
+                       np.full(1, -1, dtype=np.int64), z, 1.0, 1.0, 0.9,   # 理想终端：声门全反射、唇端压力反射 −1（ENGINE_API.md 方案 C）
                        float(_default("wall_loss")), np.zeros(N_SECT), np.zeros(N_SECT), np.zeros(8), np.zeros(8), False)
     y = np.diff(ul, prepend=0.0)
     return resample_poly(y, up, down)[:n_samples]

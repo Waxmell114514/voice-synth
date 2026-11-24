@@ -1,5 +1,5 @@
-# eval.lock  3182 files  SHA-256
-36e7da3a2a93cf1e4e344f787ecb1cda62f8932445fa2e77773f2d76e134fae4  eval/ENGINE_API.md
+# eval.lock  3182 files  SHA-256  | 2026-11-24 人批准修改 eval/ENGINE_API.md（提案 001-C）
+4da2e639ab17da0be2d6346a4abefed4ee53e9e16ed589b4a97e59740fa124d3  eval/ENGINE_API.md
 fa0f3df50c9c35e7ae9bc3c304f6ea35e53690dfebf8f6cd1010a72565113a0f  eval/README.md
 24436bcb6e8ab4c1554a8dc72eadf7ced52c55746eb89060ce74c28dbdbb5723  eval/_worker.py
 2e99975061b2ff06695995cc7e90100c5241de9fe60345f062f3f51ae7bdd422  eval/build_data.py

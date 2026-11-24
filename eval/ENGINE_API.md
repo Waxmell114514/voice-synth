@@ -19,8 +19,11 @@ python -m engine.synth --pinyin "ni3 hao3" --seed 0 --params params/x.json --out
 ```python
 FS: int                     # 引擎内部采样率
 def tube_impulse_response(area_cm2, length_cm, n_samples) -> np.ndarray
-    # 用引擎实际的声道代码（同一个 Kelly-Lochbaum 实现，同样的损耗和辐射模型），
-    # 声门端闭合，唇端开口辐射，在声门端注入单位冲激，返回唇端输出（采样率 FS）。
+    # 用引擎实际的声道代码（同一个 Kelly-Lochbaum 散射与延迟实现），但两端取**理想终端**：
+    # 声门端闭合（全反射），唇端为理想开口（压力反射 −1），关闭辐射阻抗、末端修正和可屈服声壁；
+    # 均匀分布的常数壁损耗可保留。在声门端注入单位冲激，返回唇端输出（采样率 FS）。
+    # 本测试只检验散射与延迟的实现是否正确；辐射和声壁模型是否有益由 T1–T4 判断。
+    # （2026-11-24 经人批准修改，见 proposals/001-t0-uniform-tube-vs-radiation.md，方案 C）
     # area_cm2 为从声门到唇的各段面积，均匀分段，总长 length_cm。
 def zero_input_energy(params_path, n_samples, seed) -> np.ndarray
     # 用 params 的声道配置，把声道内部状态初始化为由 seed 决定的随机值，
