@@ -1,0 +1,5 @@
+{"id": "g002-e00p", "parent": "g002-e00", "milestone": "M1",
+ "hypothesis": "第 2 代对照组（提案 004-A）：不改结构，优化目标 = T1 + 0.1 × 生理罚项；面积硬上限 9 cm²；从 g002-e00 热启动，3 种子 × 150，取中位数",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "0.035 ± 0.01（罚项把形状拉回后 T1 变差）",
+                "penalty": "< 0.005（从 0.211 降下）", "T3.cer": "不差于 g002-e00 的 0.912"},
+ "written_before_eval": true}

@@ -7,7 +7,7 @@
     m = 0..K-1；优化的是 c_m，写回的是 A'（仍是已声明参数，并裁剪到其范围）。
   - 标量参数在 [min, max] 上线性归一化到 [0,1]。
 另外，schema 条目若声明 "tune": ["M1"]，自动加入该里程碑的搜索空间。
-目标函数：当前里程碑的主指标（开发集固定子集 --set opt，seed 0），前序里程碑指标作罚项。
+目标函数（2026-11-24 起，提案 004-A）：T1 + plausibility.LAMBDA × 生理罚项；此前为当前里程碑的主指标（开发集固定子集 --set opt，seed 0），前序里程碑指标作罚项。
 """
 import os, sys, json, time, argparse, tempfile, copy
 import numpy as np
@@ -63,18 +63,23 @@ class Space:
 
 def objective_fn(milestone, tiers, with_diag=False):
     import run as RUN
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import plausibility as PL   # 提案 004-A：目标 = T1 + LAMBDA × 生理罚项
 
     def f(vals, tmpdir):
         if with_diag:
             pth = os.path.join(tmpdir, "cand.json")
             json.dump({"values": vals}, open(pth, "w"))
             summ, diags = RUN.evaluate("engine", pth, tiers, "opt", "dev", [0])
-            return summ["T1.formant_rel_error"]["mean"], diags["T1.per_vowel_rel_error_F1F2F3"]
+            pen, per_pen, _ = PL.penalty(vals)
+            per = {v: float(np.mean(e)) + PL.LAMBDA * per_pen.get(v, 0.0)
+                   for v, e in diags["T1.per_vowel_rel_error_F1F2F3"].items()}
+            return summ["T1.formant_rel_error"]["mean"] + PL.LAMBDA * pen, per
         pth = os.path.join(tmpdir, "cand.json")
         json.dump({"values": vals}, open(pth, "w"))
         summ, _ = RUN.evaluate("engine", pth, tiers, "opt", "dev", [0])
         if milestone == "M1":
-            return summ["T1.formant_rel_error"]["mean"], {k: v["mean"] for k, v in summ.items()}
+            return summ["T1.formant_rel_error"]["mean"] + PL.LAMBDA * PL.penalty(vals)[0], {k: v["mean"] for k, v in summ.items()}
         raise NotImplementedError(milestone)
     return f
 
@@ -109,7 +114,7 @@ def separable_m1(sp, f_full, budget, sigma, tmp, seed=1):
             v = sp.decode(x)
             tot, per = f_full(v, tmp); n += 1
             for k in keys:
-                F[k].append(tot if k is None else float(np.mean(per[k])))
+                F[k].append(tot if k is None else float(per[k]))
             tots.append(tot)
             if tot < best[0]:
                 best = (tot, v, n)
