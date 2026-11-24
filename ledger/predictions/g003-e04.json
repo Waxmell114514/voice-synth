@@ -1,0 +1,19 @@
+{
+ "id": "g003-e04",
+ "parent": "main",
+ "hypothesis": "非 T1 元音目标（E [ɛ]、schwa [ə]、ii [ɿ]、iii [ʅ]、er [ɚ]）改由 Story 女声模态模型生成，坐标取文献锚点：Tier I 的 q1、q2，加 Tier II 的舌尖、卷舌和唇口收紧，数值见 specs/g002-e01.md §3.3。现在这几个目标用的是 schema 中标着 PLACEHOLDER（未核实）的三区模型。6 个 T1 元音仍用自由面积，不变。属于使能型改动（提案 002-B）：不调参，直接用 e06 的参数评估。目的是查清 g002-e02 的 T3 改进来自哪里。",
+ "prediction": {
+  "T1.formant_rel_error": "0.01634，逐位相同（T1 只含 6 个 T1 元音）",
+  "penalty": "0.0054，逐位相同（罚项只算 T1 元音）",
+  "pinning": "不新增调参参数（模态坐标在 schema 中声明，不标 tune）",
+  "mechanism": "Planner 对比了 e02 与 e06 的开发集韵母混淆矩阵，e02 的改进集中在含 [ɛ] 的韵母：ian 3 → 44/116，ie 3 → 22/47，üe 4 → 10/29，ei 7 → 11/63，er 1 → 7/24；声母 j 29 → 69/172、x 49 → 69/139，也多与 i、ü 开头的韵母相连。孤立的 i 反而 223 → 205，a 64 → 53。本实验预测：ian 正确数 3 → ≥ 20，ie 3 → ≥ 10，er 1 → ≥ 4，i 和 a 不变（±5）",
+  "context": "0.0277，逐位相同（语境音节只含 T1 元音韵母）",
+  "T3.cer": "0.842 → 0.825–0.838",
+  "dynamic_checks": "能量检查不受影响（只改元音目标）。咔哒比 vowels、mixed ≤ 1.2 × 父版本",
+  "falsified_if": "T3 ≥ 0.838 且 ian 正确数 ≤ 10。那就说明 e02 的改进来自 T1 元音本身的形状：e 71 → 96，以及 /i/ 的背部收紧。下一代改测 e 的目标"
+ },
+ "milestone": "M1",
+ "written_at": "2026-11-24T17:30Z",
+ "author": "planner",
+ "researcher_caveats": "见 specs/g003-e04.md（Researcher 对预测的保留意见在规格内）"
+}
