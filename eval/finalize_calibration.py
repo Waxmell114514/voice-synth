@@ -3,6 +3,8 @@
 规则（写进 reports/calibration.md）：
 - 区分度：逐条指标要求 AUC(真人优于基线) ≥ 0.75；集合级指标要求自助法 P(真人更好) ≥ 0.95；
   T1 要求 eSpeak 偏差高于 95% 的真人说话人。不满足的指标删除。
+- 反欺骗检测器另加合理性检查：对种子引擎 g0（明显不像人）打分不得高于真人，否则删除
+  （AASIST 因此删除）。检测器的真人/基线 AUC 均已饱和，改按“真人分 − g0 分”排序。
 - 评估器分组：同一角色两个候选中区分度高的进开发组，另一个进终审组；ASR 开发组固定
   Paraformer（最快），终审组 SenseVoice。开发组锚点用开发集，终审组锚点用隐藏集。
 - 过关线（config 中标“初始”的阈值，只改这一次）：统一取“从基线到真人走完 90%”处，
@@ -40,10 +42,15 @@ def main():
 
     decisions = {}
     suites = {"dev": {"asr": "paraformer"}, "final": {"asr": "sensevoice"}}
+    sanity = raw.get("detector_sanity_g0", {})
+    det_ok = [d for d in ["aasist", "w2v-deepfake", "xlsr-deepfake"] if sanity[d]["g0"] < sanity[d]["human"]]
+    decisions["det_dropped_sanity"] = {d: sanity[d] for d in sanity if d not in det_ok}
     for role, cands, fmt in [("mos", ["utmos22", "utmosv2"], "T4.mos[{}]"),
-                             ("det", ["aasist", "w2v-deepfake"], "T4.p_real[{}]"),
+                             ("det", det_ok, "T4.p_real[{}]"),
                              ("ssl", ["chinese-hubert-base", "wavlm-base-plus"], "T4.ssl_fd[{}]")]:
         sc = score(cands, fmt)
+        if role == "det":
+            sc = {d: sanity[d]["human"] - sanity[d]["g0"] for d in cands}
         best = max(sc, key=sc.get); other = [c for c in cands if c != best][0]
         suites["dev"][role] = best; suites["final"][role] = other
         decisions[role] = sc

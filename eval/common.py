@@ -26,8 +26,8 @@ def split_syl(p):
     """'zhuang1' -> ('zh', 'uang', '1')；声母为空记 '∅'。v/ü 统一为 v。"""
     tone = p[-1] if p[-1].isdigit() else "5"
     base = p[:-1] if p[-1].isdigit() else p
-    ini = get_initials(base, strict=False) or "∅"
-    fin = get_finals(base, strict=False) or base
+    ini = get_initials(base, strict=True) or "∅"      # y、w 不算声母
+    fin = get_finals(base, strict=True) or base
     return ini, fin, tone
 
 

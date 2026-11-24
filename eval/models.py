@@ -124,10 +124,10 @@ class AASIST:
 
 
 class W2VDetector:
-    def __init__(self):
+    def __init__(self, dirname="MelodyMachine__Deepfake-audio-detection-V2"):
         torch = _torch()
         from transformers import AutoModelForAudioClassification, AutoFeatureExtractor
-        d = os.path.join(M, "MelodyMachine__Deepfake-audio-detection-V2")
+        d = os.path.join(M, dirname)
         self.fe = AutoFeatureExtractor.from_pretrained(d)
         self.m = AutoModelForAudioClassification.from_pretrained(d).eval()
         self.real = int([k for k, v in self.m.config.id2label.items() if v == "real"][0])
@@ -143,7 +143,11 @@ class W2VDetector:
 
 
 def make_detector(kind):
-    return AASIST() if kind == "aasist" else W2VDetector()
+    if kind == "aasist":
+        return AASIST()
+    if kind == "xlsr-deepfake":
+        return W2VDetector("Gustking__wav2vec2-large-xlsr-deepfake-audio-classification")
+    return W2VDetector()
 
 
 # ---------------------------------------------------------------- 自监督嵌入（句级均值池化，取中间层）

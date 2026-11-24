@@ -2,7 +2,7 @@ language: zh-CN
 auto_freeze: true
 freeze_checks:
   human_beats_baseline_on_every_metric: true
-  human_T3_cer_max: 0.05        # 初始
+  human_T3_cer_max: 0.05        # 已校准（2026-11-24）：保持 0.05 不放宽；实测真人 CER 开发组 0.046、终审组 0.046
 generation:
   k_hypotheses: 6
   min_targeting_worst_diagnostic: 3
@@ -16,11 +16,11 @@ optimizer:
   dev_subset_sentences: 30
 eval_quota_per_experiment: 2
 param_cap: 3000
-gates:                           # 全部为初始值，阶段 0.3 校准后修改一次
-  M1_formant_rel_error_max: 0.10
-  M2_syllable_acc_min: 0.90
-  M2_tone_acc_min: 0.90
-  M3_dev_cer_max: 0.10
+gates:                           # 阶段 0.3 已校准（2026-11-24），此后不再修改。规则见 reports/calibration.md
+  M1_formant_rel_error_max: 0.099
+  M2_syllable_acc_min: 0.93
+  M2_tone_acc_min: 0.918
+  M3_dev_cer_max: 0.093
 escalate:
   single_gen_main_metric_jump: 0.15
   prediction_miss_factor: 5
