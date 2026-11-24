@@ -5,3 +5,5 @@ eval/data/
 eval/cache/
 *.wav
 !listening/**/*.wav
+.claude/worktrees/
+eval/tools/
