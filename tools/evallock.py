@@ -37,6 +37,10 @@ def freeze():
         os.chmod(p, os.stat(p).st_mode & ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
     for d, ds, _ in os.walk(EVAL):
         os.chmod(d, os.stat(d).st_mode & ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH))
+    # 容器内以 root 运行时权限位无效，另加 ext4 不可变标记（符号链接不支持，忽略）
+    import subprocess
+    subprocess.run(f"find '{EVAL}' -name .cache -prune -o -print0 | xargs -0 chattr +i", shell=True,
+                   stderr=subprocess.DEVNULL)
     print(f"frozen {len(files)} files")
 
 
