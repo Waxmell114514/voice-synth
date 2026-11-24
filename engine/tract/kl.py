@@ -24,6 +24,14 @@ C_SOUND = 350.0  # m/s，见 specs/g0-seed.md
 @njit(cache=True, fastmath=False)
 def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
            r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy):
+    """原签名（T0 钩子使用）：无声门湍流源，等价于 kl_core(..., gsrc=[0], gidx=-1)。"""
+    return kl_core(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
+                   r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy, np.zeros(1), -1)
+
+
+@njit(cache=True, fastmath=False)
+def kl_core(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
+            r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy, gsrc, gidx):
     """
     n        仿真采样数
     block    控制块长度（采样）；A[nb, N]、Avp[nb]、nidx[nb]、ngain[nb] 每块一组
@@ -31,6 +39,7 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
     ug[n]    声门处注入（体积速度，已含送气噪声）
     noise[n] 湍流噪声源（单位方差），在 nidx 段下游注入，增益 ngain
     f,b,fn,bn  初始状态（就地更新）
+    gsrc[n]  声门湍流源（已含幅度，单位同行波量），在 gidx 与 gidx+1 段之间注入；gidx < 0 表示无
     返回 (u_lip[n], u_nose[n], energy[n])
     """
     N = f.shape[0]
@@ -82,6 +91,10 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             s = 0.5 * ngain[blk] * noise[t]
             nf[ki + 1] += s
             nb_[ki] -= s
+        if gidx >= 0 and gidx < N - 1:
+            s = 0.5 * gsrc[t]
+            nf[gidx + 1] += s
+            nb_[gidx] -= s
         # 损耗并推进一个采样
         e = 0.0
         for k in range(N):

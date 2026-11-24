@@ -1,6 +1,6 @@
 {
  "version": "g0",
- "n_params": 556,
+ "n_params": 570,
  "area_function_source": "Story 2008 JASA 123:327 Table I (male, 44 sections); a<-[ɑ], o<-[o], e<-[ʌ], i<-[i], u<-[u], ü constructed [i]1-41+[u]42-44 (未核实). See specs/g0-seed.md §3. | E/schwa/ii/iii/er: PLACEHOLDER three-zone model (未核实)",
  "params": [
   {
@@ -164,7 +164,7 @@
   },
   {
    "name": "breath_noise_gain",
-   "meaning": "声门开相送气噪声相对幅度",
+   "meaning": "声门开相送气噪声相对幅度【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "1",
    "min": 0.0,
    "max": 0.5,
@@ -173,7 +173,7 @@
   },
   {
    "name": "asp_noise_gain",
-   "meaning": "送气音与 h 的声门湍流噪声幅度",
+   "meaning": "送气音与 h 的声门湍流噪声幅度【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 5.0,
@@ -935,7 +935,7 @@
   },
   {
    "name": "fric_gain_labdent",
-   "meaning": "唇齿擦音 / 塞擦音湍流噪声增益",
+   "meaning": "唇齿擦音 / 塞擦音湍流噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -944,7 +944,7 @@
   },
   {
    "name": "fric_gain_dent",
-   "meaning": "舌尖前（齿龈前）擦音 / 塞擦音湍流噪声增益",
+   "meaning": "舌尖前（齿龈前）擦音 / 塞擦音湍流噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -953,7 +953,7 @@
   },
   {
    "name": "fric_gain_ret",
-   "meaning": "舌尖后（龈后）擦音 / 塞擦音湍流噪声增益",
+   "meaning": "舌尖后（龈后）擦音 / 塞擦音湍流噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -962,7 +962,7 @@
   },
   {
    "name": "fric_gain_pal",
-   "meaning": "舌面（龈腭）擦音 / 塞擦音湍流噪声增益",
+   "meaning": "舌面（龈腭）擦音 / 塞擦音湍流噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -971,7 +971,7 @@
   },
   {
    "name": "fric_gain_vel",
-   "meaning": "舌根（软腭）擦音 / 塞擦音湍流噪声增益",
+   "meaning": "舌根（软腭）擦音 / 塞擦音湍流噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -1034,7 +1034,7 @@
   },
   {
    "name": "burst_gain",
-   "meaning": "塞音除阻爆破噪声增益",
+   "meaning": "塞音除阻爆破噪声增益【g001-e07 起引擎不再使用（由气流驱动的噪声源取代）】",
    "unit": "relative",
    "min": 0.0,
    "max": 50.0,
@@ -1192,6 +1192,132 @@
    "min": 0.1,
    "max": 0.6,
    "default": 0.3,
+   "shape": []
+  },
+  {
+   "name": "p_sub_pa",
+   "meaning": "声门下压（肺压，常态对话音量）；准静态气流 U_DC 的驱动压力（规格 g001-e07 §3.2，S2 500–2000 Pa）",
+   "unit": "Pa",
+   "min": 400.0,
+   "max": 1500.0,
+   "default": 800.0,
+   "shape": []
+  },
+  {
+   "name": "ag_voiced_cm2",
+   "meaning": "发声时声门平均面积（准静态气流用）",
+   "unit": "cm^2",
+   "min": 0.02,
+   "max": 0.15,
+   "default": 0.05,
+   "shape": []
+  },
+  {
+   "name": "ag_unasp_cm2",
+   "meaning": "不送气清塞音 / 塞擦音闭塞与除阻时的声门面积",
+   "unit": "cm^2",
+   "min": 0.02,
+   "max": 0.2,
+   "default": 0.08,
+   "shape": []
+  },
+  {
+   "name": "ag_abduct_cm2",
+   "meaning": "送气音、清擦音、h 的声门外展面积",
+   "unit": "cm^2",
+   "min": 0.1,
+   "max": 0.6,
+   "default": 0.3,
+   "shape": []
+  },
+  {
+   "name": "ug_ac_peak_cm3s",
+   "meaning": "LF 声门交流气流峰值（把发声气流定标到 cm³/s）",
+   "unit": "cm^3/s",
+   "min": 100.0,
+   "max": 600.0,
+   "default": 250.0,
+   "shape": []
+  },
+  {
+   "name": "re_crit",
+   "meaning": "湍流噪声临界雷诺数 Re_c（g_Re = max(0, 1 − (Re_c/Re)²)）",
+   "unit": "1",
+   "min": 1000.0,
+   "max": 3000.0,
+   "default": 1700.0,
+   "shape": []
+  },
+  {
+   "name": "noise_g_asp_log10",
+   "meaning": "声门湍流源 Stevens 律系数 G_asp 的 log10（声门外展时；p_s = G ρ v³ √A / c）",
+   "unit": "log10(1)",
+   "min": -4.0,
+   "max": 1.0,
+   "default": -0.2,
+   "shape": []
+  },
+  {
+   "name": "noise_g_breath_rel_log10",
+   "meaning": "发声（voice=1）时声门湍流源系数相对 G_asp 的 log10（Birkholz 声门源增益随声门状态可变）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 0.0,
+   "default": -1.5,
+   "shape": []
+  },
+  {
+   "name": "noise_g_obst_log10",
+   "meaning": "舌尖障碍源系数 G 的 log10（舌尖前 s z c；d t 除阻）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 2.0,
+   "default": -0.7,
+   "shape": []
+  },
+  {
+   "name": "noise_g_wall_log10",
+   "meaning": "舌根壁源系数 G 的 log10（h；g k 除阻）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 2.0,
+   "default": -1.0,
+   "shape": []
+  },
+  {
+   "name": "noise_g_labdent_log10",
+   "meaning": "唇齿源系数 G 的 log10（f）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 2.0,
+   "default": -0.1,
+   "shape": []
+  },
+  {
+   "name": "noise_g_burst_log10",
+   "meaning": "塞音除阻瞬态额外系数（乘在部位 G 上）的 log10；物理上理想值 0",
+   "unit": "log10(1)",
+   "min": -1.0,
+   "max": 1.0,
+   "default": 0.3,
+   "shape": []
+  },
+  {
+   "name": "noise_g_postalv_log10",
+   "meaning": "舌叶 / 舌面前（卷舌 sh zh ch、龈腭 x j q）障碍源系数 G 的 log10（Elie & Laprie 2016：ʃ 的 ξ 约为 s 的 5.5 倍）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 2.0,
+   "default": 0.0,
+   "shape": []
+  },
+  {
+   "name": "noise_g_lab_log10",
+   "meaning": "双唇除阻源系数 G 的 log10（b p 爆破；双唇无下游障碍物，与唇齿源分开）",
+   "unit": "log10(1)",
+   "min": -3.0,
+   "max": 2.0,
+   "default": -1.2,
    "shape": []
   }
  ]
