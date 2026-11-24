@@ -8,3 +8,4 @@ eval/cache/
 .claude/worktrees/
 eval/tools/
 reports/.calib_log.txt
+reports/evals/*.log
