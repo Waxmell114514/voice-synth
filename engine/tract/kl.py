@@ -24,6 +24,14 @@ C_SOUND = 350.0  # m/s，见 specs/g0-seed.md
 @njit(cache=True, fastmath=False)
 def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
            r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy):
+    """原签名（T0 钩子使用）：无声门湍流源，等价于 kl_core(..., gsrc=[0], gidx=-1)。"""
+    return kl_core(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
+                   r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy, np.zeros(1), -1)
+
+
+@njit(cache=True, fastmath=False)
+def kl_core(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
+            r_g, r_lip, r_nose, mu, f, b, fn, bn, want_energy, gsrc, gidx):
     """
     n        仿真采样数
     block    控制块长度（采样）；A[nb, N]、Avp[nb]、nidx[nb]、ngain[nb] 每块一组
@@ -31,6 +39,7 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
     ug[n]    声门处注入（体积速度，已含送气噪声）
     noise[n] 湍流噪声源（单位方差），在 nidx 段下游注入，增益 ngain
     f,b,fn,bn  初始状态（就地更新）
+    gsrc[n]  声门湍流源（已含幅度，单位同行波量），在 gidx 与 gidx+1 段之间注入；gidx < 0 表示无
     返回 (u_lip[n], u_nose[n], energy[n])
     """
     N = f.shape[0]
@@ -42,18 +51,32 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
     nb_ = np.zeros(N)
     nfn = np.zeros(Nn)
     nbn = np.zeros(Nn)
+    Ab = np.zeros(N)
+    nblk = A.shape[0]
     g = 1.0 - mu
     for t in range(n):
         blk = t // block
-        if blk >= A.shape[0]:
-            blk = A.shape[0] - 1
+        if blk >= nblk:
+            blk = nblk - 1
+        # 面积在控制块之间逐采样线性插值（g001-e07c）：块常数面积在块边界阶跃，
+        # 唇端 u = A(1+r)f 随之阶跃，辐射差分后为 1 kHz 块率的爆音。单块调用（T0）时不插值。
+        if blk + 1 < nblk:
+            fr = (t - blk * block) / block
+            for k in range(N):
+                Ab[k] = A[blk, k] + fr * (A[blk + 1, k] - A[blk, k])
+            avp = Avp[blk] + fr * (Avp[blk + 1] - Avp[blk])
+        else:
+            for k in range(N):
+                Ab[k] = A[blk, k]
+            avp = Avp[blk]
+        if avp < 0.0:
+            avp = 0.0
         # 声门端
-        nf[0] = r_g * b[0] + ug[t] / A[blk, 0]
-        avp = Avp[blk] if Avp[blk] > 0.0 else 0.0
+        nf[0] = r_g * b[0] + ug[t] / Ab[0]
         # 口腔结点
         for k in range(N - 1):
-            a1 = A[blk, k]
-            a2 = A[blk, k + 1]
+            a1 = Ab[k]
+            a2 = Ab[k + 1]
             if k == kv:
                 a3 = avp  # 腭咽口（鼻腔第 0 段）面积；a3 = 0 时精确退化为两端口
                 pj = 2.0 * (a1 * f[k] + a2 * b[k + 1] + a3 * bn[0]) / (a1 + a2 + a3)
@@ -73,7 +96,7 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             nbn[k] = pj - fn[k]
         # 唇端、鼻孔端
         nb_[N - 1] = -r_lip * f[N - 1]
-        ul[t] = A[blk, N - 1] * (1.0 + r_lip) * f[N - 1]
+        ul[t] = Ab[N - 1] * (1.0 + r_lip) * f[N - 1]
         nbn[Nn - 1] = -r_nose * fn[Nn - 1]
         un[t] = An[Nn - 1] * (1.0 + r_nose) * fn[Nn - 1]
         # 湍流噪声：串联压力源，在 nidx 与 nidx+1 段之间（向下游 +½，上游 −½）
@@ -82,13 +105,17 @@ def kl_run(n, block, A, An, Avp, kv, ug, noise, nidx, ngain,
             s = 0.5 * ngain[blk] * noise[t]
             nf[ki + 1] += s
             nb_[ki] -= s
+        if gidx >= 0 and gidx < N - 1:
+            s = 0.5 * gsrc[t]
+            nf[gidx + 1] += s
+            nb_[gidx] -= s
         # 损耗并推进一个采样
         e = 0.0
         for k in range(N):
             f[k] = g * nf[k]
             b[k] = g * nb_[k]
             if want_energy:
-                e += A[blk, k] * (f[k] * f[k] + b[k] * b[k])
+                e += Ab[k] * (f[k] * f[k] + b[k] * b[k])
         if avp <= 0.0:
             # 软腭关闭：腭咽口段面积为 0，不进能量和；必须清零，否则它会积累口腔压力，
             # 开启瞬间释放成爆音（Critic 对 g001-fix01 的审查）

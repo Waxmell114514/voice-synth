@@ -4,9 +4,9 @@
   A[nf, N]    口腔面积函数（声门→唇，cm²）
   Avp[nf]     软腭口面积（cm²）
   nidx[nf]    湍流噪声注入段号（-1 表示无）
-  ngain[nf]   湍流噪声增益
+  ngain[nf]   口腔湍流源无量纲系数 G（按部位，见 noise_G；幅度由气流决定，见 source/turbulence.py）
   voice[nf]   发声幅度（0–1）
-  asp[nf]     声门送气噪声增益
+  ag[nf]      准静态声门面积（cm²；0 = 无气流，静音段）
   f0[nf]      基频（Hz）
 辅音 = 叠加在后接元音面积函数上的收紧（预期性协同发音）。
 所有数值来自 params（见 params/schema.json 与 specs/g0-seed.md）。
@@ -49,8 +49,17 @@ def constrict(base, place_frac, width, area, mode="min"):
     c = (N - 1) * (1.0 - place_frac)
     k = np.arange(N)
     m = np.exp(-0.5 * ((k - c) / max(width, 0.3)) ** 2)
+    m = m / m.max()   # 最窄处恰好达到给定面积（c 非整数时高斯峰不在段中心；g001-e07：噪声电平依赖实际收紧面积）
     tgt = base * (1 - m) + area * m
     return np.minimum(base, tgt) if mode == "min" else tgt
+
+
+def noise_G(P, place):
+    """口腔湍流源类型系数（Birkholz 2014 表 1 的分类，规格 2.3）：
+    双唇 → 双唇源；唇齿 → 唇齿源；舌尖（dent、alv）→ 障碍源；舌叶 / 舌面前（ret、pal）→
+    舌叶障碍源（Elie & Laprie 2016 ʃ > s）；舌根 → 壁源。"""
+    key = {"lab": "lab", "labdent": "labdent", "vel": "wall", "ret": "postalv", "pal": "postalv"}.get(place, "obst")
+    return 10.0 ** P[f"noise_g_{key}_log10"]
 
 
 def place_index(P, place):
@@ -59,21 +68,39 @@ def place_index(P, place):
     return int(np.clip(c, 0, N - 2))
 
 
+def _lp1(x, al):
+    """沿时间轴（axis 0）的一阶低通 y[i] = al·y[i-1] + (1−al)·x[i]，初值 y[0] = x[0]（无起始瞬态）。"""
+    from scipy.signal import lfilter, lfilter_zi
+    x = np.asarray(x, float)
+    zi = lfilter_zi([1.0 - al], [1.0, -al])
+    zi = zi.reshape((1,) + (1,) * (x.ndim - 1)) * x[:1]
+    y, _ = lfilter([1.0 - al], [1.0, -al], x, axis=0, zi=zi)
+    return y
+
+
 class Timeline:
     def __init__(self, P, frame_s):
         self.P = P
         self.fs = frame_s
-        self.keys = []   # (t, A, Avp, nidx, ngain, voice, asp)
+        self.keys = []   # (t, A, Avp, nidx, ngain, voice, ag)
         self.f0k = []    # (t, chao_level)
 
-    def key(self, t, A, Avp=0.0, nidx=-1, ngain=0.0, voice=1.0, asp=0.0):
-        self.keys.append((t, np.asarray(A, float), float(Avp), int(nidx), float(ngain), float(voice), float(asp)))
+    def key(self, t, A, Avp=0.0, nidx=-1, ngain=0.0, voice=1.0, ag=None):
+        if ag is None:   # 默认：发声 → 发声声门面积；不发声 → 声门关闭 / 无呼气（静音）
+            ag = self.P["ag_voiced_cm2"] if voice > 0 else 0.0
+        self.keys.append((t, np.asarray(A, float), float(Avp), int(nidx), float(ngain), float(voice), float(ag)))
 
     def render(self, total):
         P = self.P
         nf = max(2, int(np.ceil(total / self.fs)) + 1)
         t = np.arange(nf) * self.fs
         K = sorted(self.keys, key=lambda x: x[0])
+        # 静音（无发声、无气流）关键帧与紧随其后、同一时刻的声母关键帧：发音器官在静音中预先就位
+        # （静音帧取声母的面积函数与软腭口），否则平滑后的就位过程与声门外展重叠，产生无声母的气流噪声。
+        for i in range(len(K) - 1, 0, -1):
+            p, q = K[i - 1], K[i]
+            if q[0] - p[0] < 1e-9 and p[5] == 0.0 and p[6] == 0.0:
+                K[i - 1] = (p[0], q[1], q[2]) + tuple(p[3:])
         kt = np.array([k[0] for k in K])
         N = K[0][1].shape[0]
         A = np.empty((nf, N))
@@ -82,7 +109,7 @@ class Timeline:
             A[:, j] = np.interp(t, kt, KA[:, j])
         Avp = np.interp(t, kt, [k[2] for k in K])
         voice = np.interp(t, kt, [k[5] for k in K])
-        asp = np.interp(t, kt, [k[6] for k in K])
+        ag = np.interp(t, kt, [k[6] for k in K])
         ngain = np.interp(t, kt, [k[4] for k in K])
         # 噪声位置：取最近的有噪声关键帧（分段常数）
         idx = np.searchsorted(kt, t, side="right") - 1
@@ -99,8 +126,13 @@ class Timeline:
             lev = np.full(nf, 3.0)
         st = (lev - 3.0) / 4.0 * P["f0_range_st"] + P["declination_st_per_s"] * t
         f0 = P["f0_base_hz"] * 2.0 ** (st / 12.0)
+        # 发音器官惯性（g001-e07c）：面积函数、软腭口与声门面积经两级一阶低通（各 artic_tau_ms/2，临界阻尼二阶，速度连续）。
+        # 同一时刻的两个关键帧（上一音节末目标与下一声母起始）否则会让这些量在一个控制块内跳变：
+        # 唇端输出 u = A_lip(1+r)f 随之阶跃（辐射差分后为爆音），准静态气流 U_DC 也随之阶跃。
+        al = float(np.exp(-self.fs / (0.5 * P["artic_tau_ms"] * 1e-3)))
+        A = _lp1(_lp1(A, al), al); Avp = _lp1(_lp1(Avp, al), al); ag = _lp1(_lp1(ag, al), al)
         A = np.maximum(A, P["min_area"])
-        return A, Avp, nidx, ngain, voice, asp, f0
+        return A, Avp, nidx, ngain, voice, ag, f0
 
 
 def plan(tokens, P, frame_s):
@@ -166,36 +198,37 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
         if manner in ("stop_u", "stop_a", "affr_u", "affr_a"):
             clo = constrict(first, pf, w, P["closure_area"])
             asp_ = manner.endswith("_a")
+            ag = P["ag_abduct_cm2" if asp_ else "ag_unasp_cm2"]
+            G = noise_G(P, place)
             dc = P["dur_closure_asp_ms" if asp_ else "dur_closure_unasp_ms"] * ms
-            tl.key(t, clo, voice=0.0)
+            tl.key(t, clo, voice=0.0, ag=ag)
             t += dc
-            tl.key(t, clo, voice=0.0)
+            tl.key(t, clo, voice=0.0, ag=ag)
             if manner.startswith("stop"):
                 # 除阻：爆破噪声 + （送气）
                 vot = P["vot_asp_ms" if asp_ else "vot_unasp_ms"] * ms
                 rel = constrict(first, pf, w, P["release_area"])
-                tl.key(t + 0.001, rel, nidx=ci, ngain=P["burst_gain"], voice=0.0,
-                       asp=P["asp_noise_gain"] if asp_ else 0.0)
+                tl.key(t + 0.001, rel, nidx=ci, ngain=G * 10.0 ** P["noise_g_burst_log10"], voice=0.0, ag=ag)
                 t += vot
-                tl.key(t, first, voice=0.0, asp=P["asp_noise_gain"] if asp_ else 0.0)
+                tl.key(t, first, voice=0.0, ag=ag)
             else:
                 fr = constrict(first, pf, w, P["fric_area"])
                 dfr = P["dur_affr_fric_asp_ms" if asp_ else "dur_affr_fric_unasp_ms"] * ms
-                g = P[f"fric_gain_{place}"]
-                tl.key(t + 0.001, fr, nidx=ci, ngain=g, voice=0.0, asp=P["asp_noise_gain"] if asp_ else 0.0)
+                tl.key(t + 0.001, fr, nidx=ci, ngain=G, voice=0.0, ag=ag)
                 t += dfr
-                tl.key(t, fr, nidx=ci, ngain=g * 0.5, voice=0.0, asp=P["asp_noise_gain"] if asp_ else 0.0)
+                tl.key(t, fr, nidx=ci, ngain=G, voice=0.0, ag=ag)
                 t += 0.01
-                tl.key(t, first, voice=0.0)
+                tl.key(t, first, voice=0.0, ag=ag)
         elif manner in ("fric", "fric_h"):
             fr = constrict(first, pf, w, P["fric_area"] if manner == "fric" else P["fric_area_h"])
-            g = P[f"fric_gain_{place}"]
+            G = noise_G(P, place)
+            ag = P["ag_abduct_cm2"]
             dfr = P["dur_fric_ms"] * ms
-            tl.key(t, fr, nidx=ci, ngain=g, voice=0.0, asp=P["asp_noise_gain"] if manner == "fric_h" else 0.0)
+            tl.key(t, fr, nidx=ci, ngain=G, voice=0.0, ag=ag)
             t += dfr
-            tl.key(t, fr, nidx=ci, ngain=g, voice=0.0, asp=P["asp_noise_gain"] if manner == "fric_h" else 0.0)
+            tl.key(t, fr, nidx=ci, ngain=G, voice=0.0, ag=ag)
             t += 0.01
-            tl.key(t, first, voice=0.0)
+            tl.key(t, first, voice=0.0, ag=ag)
         elif manner == "nasal":
             clo = constrict(first, pf, w, P["closure_area"])
             dn = P["dur_nasal_init_ms"] * ms

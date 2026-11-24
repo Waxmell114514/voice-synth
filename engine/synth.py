@@ -9,8 +9,9 @@ from scipy.signal import resample_poly
 
 from .params_io import load_params
 from .control.gestures import plan
-from .source.lf import glottal_source
-from .tract.kl import kl_run, sim_rate
+from .source.lf import glottal_source, lf_period
+from .source import turbulence as TB
+from .tract.kl import kl_core, sim_rate
 
 FS_OUT = 22050
 N_SECT = 44
@@ -21,6 +22,12 @@ def nasal_areas(P, n_sections_len):
     return np.interp(np.linspace(0, 1, n_sections_len), np.linspace(0, 1, len(a)), a)
 
 
+def lf_peak_flow(rd, n=2000):
+    """归一化周期（T0 = 1, Ee = 1）LF 气流的峰值。"""
+    p, _ = lf_period(n, float(np.clip(rd, 0.3, 2.7)))
+    return float(np.max(np.cumsum(p) / n))
+
+
 def render(tokens, P, seed):
     rng = np.random.default_rng(seed)
     L = P["tract_length_cm"]
@@ -29,7 +36,7 @@ def render(tokens, P, seed):
     block = max(1, int(round(fs_sim * 1e-3)))
     frame_s = block / fs_sim
     tl, total = plan(tokens, P, frame_s)
-    A, Avp, nidx, ngain, voice, asp, f0f = tl.render(total)
+    A, Avp, nidx, ngain, voice, ag, f0f = tl.render(total)
     nb = A.shape[0]
     n = nb * block
     # 逐采样源控制
@@ -38,19 +45,32 @@ def render(tokens, P, seed):
     f0 = np.interp(fi, np.arange(nb), f0f)
     vamp = np.interp(fi, np.arange(nb), voice)
     rd = np.full(n, P["rd_modal"])
-    du, aspn = glottal_source(f0 * (vamp > 0.05), rd, vamp, fs_sim, rng,
-                              jitter=P["jitter"], shimmer=P["shimmer"], asp_gain=P["breath_noise_gain"])
-    ug = np.cumsum(du) / fs_sim * P["f0_base_hz"]          # 体积速度（相对单位）
-    asp_s = np.interp(fi, np.arange(nb), asp)
-    ug = ug + aspn * 0.01 + asp_s * 0.01 * rng.standard_normal(n)
-    noise = rng.standard_normal(n)
+    du, _ = glottal_source(f0 * (vamp > 0.05), rd, vamp, fs_sim, rng,
+                           jitter=P["jitter"], shimmer=P["shimmer"], asp_gain=0.0)
+    # LF 交流气流定标到 cm³/s：每周期积分得归一化流量，峰值按 Rd 的归一化峰值换成 ug_ac_peak_cm3s
+    ug = np.cumsum(du * f0) / fs_sim * (P["ug_ac_peak_cm3s"] / lf_peak_flow(P["rd_modal"]))
+    # 湍流噪声源（specs/g001-e07.md）：准静态气流 → Stevens 律幅度 × 系数 G × 种子白噪声
+    clo = max(P["closure_area"], P["min_area"])
+    udc, frac_oral = TB.dc_flow(A, Avp, ag, P["p_sub_pa"], clo)
+    # 口腔收紧源只用经口腔的那一路气流（软腭开时鼻腔分流，g001-e07c）
+    amp_c = TB.constriction_amp(A, clo, nidx, udc * frac_oral, P["re_crit"], P["p_sub_pa"]) * ngain     # 每控制帧
+    ugl = TB.lowpass_flow(np.interp(fi, np.arange(nb), udc) + np.maximum(ug, 0.0), fs_sim)
+    ag_s = np.interp(fi, np.arange(nb), ag)
+    # 声门源系数随声门外展程度在 log 域插值（Birkholz 2014：声门源增益随声门状态可变）：
+    # A_g ≤ ag_voiced → G_asp·10^breath_rel；A_g ≥ ag_abduct → G_asp
+    ab = np.clip((ag_s - P["ag_voiced_cm2"]) / max(P["ag_abduct_cm2"] - P["ag_voiced_cm2"], 1e-3), 0.0, 1.0)
+    g_g = 10.0 ** (P["noise_g_asp_log10"] + P["noise_g_breath_rel_log10"] * (1.0 - ab))
+    gsrc = TB.stevens_amp(ugl, ag_s, P["re_crit"], P["p_sub_pa"]) * g_g * rng.standard_normal(n)
+    noise = np.interp(fi, np.arange(nb), amp_c) * rng.standard_normal(n)
+    gidx = int(np.clip(round(TB.GLOTTAL_SRC_CM / dx_cm), 0, N_SECT - 2))
     Nn = max(4, int(round(P["nasal_length_cm"] / dx_cm)))
     An = nasal_areas(P, Nn)
     kv = int(np.clip(round(P["velum_pos_frac"] * (N_SECT - 1)), 1, N_SECT - 3))
     f = np.zeros(N_SECT); b = np.zeros(N_SECT); fn = np.zeros(Nn); bn = np.zeros(Nn)
-    ul, un, _ = kl_run(n, block, np.ascontiguousarray(A), An, np.ascontiguousarray(Avp), kv, ug,
-                       noise, np.ascontiguousarray(nidx), np.ascontiguousarray(ngain) * 0.01,
-                       P["r_glottis"], P["r_lip"], P["r_nose"], P["wall_loss"], f, b, fn, bn, False)
+    ul, un, _ = kl_core(n, block, np.ascontiguousarray(A), An, np.ascontiguousarray(Avp), kv, ug,
+                        noise, np.ascontiguousarray(nidx), np.ones(nb),
+                        P["r_glottis"], P["r_lip"], P["r_nose"], P["wall_loss"], f, b, fn, bn, False,
+                        gsrc, gidx)
     u = ul + un
     y = np.diff(u, prepend=0.0)                              # 辐射：一阶差分
     y = resample_poly(y, up, down)
