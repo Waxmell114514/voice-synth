@@ -8,6 +8,9 @@
    eval/t0.py 只比较 1 ms 块最大值且容差 1e-6，漏过了 g0 的鼻腔结点 bug。
 2. 动态瞬态：合成含软腭开合与元音切换的序列，测 6 kHz 以上的“咔哒”：
    每 2 ms 帧的高通 RMS，报告 max / 中位数（有声段内）。与父版本对比，明显变大即可疑。
+3. lensweep（specs/g003-e01.md §6.2）：只在参数文件或当前树的 schema 含 len_ratio_* 时运行，否则跳过（输出与改动前相同）。
+   拼音同 vowels；把各元音的 len_ratio 覆盖为 LENSWEEP 中的极值（每个过渡跨约 15 段，伸长和缩短都有），
+   对照为同一引擎、同一参数文件、全部 len_ratio_* = 1.0 的同一序列。判据：lensweep ≤ 1.5 × 对照。
 """
 import os, sys, json, argparse, subprocess, tempfile
 import numpy as np
@@ -16,6 +19,10 @@ SEQS = {"velum": "a1 ma1 an1 na1 ang1 a1 mang2 nan2",
         "vowels": "a1 yi1 wu1 a1 yu1 o1 e1 a1",
         "mixed": "ni3 hao3 ma1 wo3 men5 nan2 fang1"}
 CORNERS = [{}, {"wall_loss": 0.0, "r_glottis": 1.0, "r_lip": 0.995, "r_nose": 0.995}]
+LENSWEEP_PINYIN = SEQS["vowels"]
+LENSWEEP = {"len_ratio_a": 0.85, "len_ratio_i": 1.20, "len_ratio_u": 0.85,
+            "len_ratio_v": 1.20, "len_ratio_o": 1.20, "len_ratio_e": 0.85}
+LENSWEEP_MAX_RATIO = 1.5
 
 
 def energy_check(params_path, root):
@@ -40,6 +47,30 @@ def energy_check(params_path, root):
         os.remove(tf.name)
         out.append({"corner": ci, "max_rel_rise_per_sample": worst, "pass": worst <= 1e-12})
     sys.path.remove(root)
+    return out
+
+
+def len_ratio_names(root, params_path):
+    """参数文件 values 或当前树 params/schema.json 中的 len_ratio_* 名字；都没有时为空（跳过 lensweep）。"""
+    names = {k for k in json.load(open(params_path)).get("values", {}) if k.startswith("len_ratio_")}
+    sch = os.path.join(root, "params", "schema.json")
+    if os.path.exists(sch):
+        names |= {p["name"] for p in json.load(open(sch, encoding="utf-8"))["params"] if p["name"].startswith("len_ratio_")}
+    return sorted(names)
+
+
+def lensweep_check(root, params_path, names):
+    base = json.load(open(params_path))
+    out = {}
+    for tag, over in (("this", {k: LENSWEEP.get(k, 1.0) for k in names}), ("lambda1", {k: 1.0 for k in names})):
+        p = dict(base); p["values"] = dict(base.get("values", {}), **over)
+        tf = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False); json.dump(p, tf); tf.close()
+        try:
+            out[tag] = click_metric(root, tf.name, LENSWEEP_PINYIN)
+        finally:
+            os.remove(tf.name)
+    ok = None if out["this"] is None or out["lambda1"] is None else out["this"] <= LENSWEEP_MAX_RATIO * out["lambda1"]
+    out.update({"overrides": {k: LENSWEEP.get(k, 1.0) for k in names}, "max_ratio": LENSWEEP_MAX_RATIO, "pass": ok})
     return out
 
 
@@ -75,6 +106,9 @@ def main():
         if a.parent_root:
             c["parent"] = click_metric(a.parent_root, a.parent_params or a.params, s)
         res["clicks"][k] = c
+    lr = len_ratio_names(root, a.params)
+    if lr:
+        res["clicks"]["lensweep"] = lensweep_check(root, a.params, lr)
     res["energy_pass"] = all(x["pass"] for x in res["energy"])
     print(json.dumps(res, ensure_ascii=False, indent=1))
 
