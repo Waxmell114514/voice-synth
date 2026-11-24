@@ -1,0 +1,7 @@
+{"id": "g001-e00s", "parent": "g000-e00", "milestone": "M1",
+ "hypothesis": "对照组（优化器改为可分搜索）：不改引擎结构；元音面积上限 10 cm²；每个元音独立 CMA-ES（6 维）+ 共用标量 CMA-ES（4 维），总预算仍 150 次",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "0.07 ± 0.015",
+                "optimizer_noise": "种子 1（正式）与种子 2（只估噪声）相差 < 0.015；joint 模式两次为 0.065 与 0.100",
+                "independent_check": "语境元音偏差与 T1 相差 < 0.015"},
+ "note": "种子 1 为正式结果，事先约定，不在两次之间挑选",
+ "written_before_eval": true}

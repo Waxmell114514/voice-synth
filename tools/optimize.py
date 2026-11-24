@@ -60,10 +60,15 @@ class Space:
         return v
 
 
-def objective_fn(milestone, tiers):
+def objective_fn(milestone, tiers, with_diag=False):
     import run as RUN
 
     def f(vals, tmpdir):
+        if with_diag:
+            pth = os.path.join(tmpdir, "cand.json")
+            json.dump({"values": vals}, open(pth, "w"))
+            summ, diags = RUN.evaluate("engine", pth, tiers, "opt", "dev", [0])
+            return summ["T1.formant_rel_error"]["mean"], diags["T1.per_vowel_rel_error_F1F2F3"]
         pth = os.path.join(tmpdir, "cand.json")
         json.dump({"values": vals}, open(pth, "w"))
         summ, _ = RUN.evaluate("engine", pth, tiers, "opt", "dev", [0])
@@ -73,6 +78,38 @@ def objective_fn(milestone, tiers):
     return f
 
 
+def separable_m1(sp, f_full, budget, sigma, tmp, seed=1):
+    """M1 可分搜索：T1 = 各元音偏差之和，每个元音的共振峰基本只取决于自己的面积函数。
+    每个元音一个 CMA-ES（K_MODES 维），共用标量一个 CMA-ES；每次评估同时喂给全部搜索器
+    （元音搜索器用该元音的偏差，标量搜索器用总偏差）。总评估次数不变。"""
+    import cma
+    nv = len(sp.arrays)
+    x0 = sp.x0()
+    pop = 8
+    ess = [cma.CMAEvolutionStrategy(np.zeros(K_MODES), sigma, {"seed": seed * 100 + i, "verbose": -9, "popsize": pop})
+           for i in range(nv)]
+    ss = cma.CMAEvolutionStrategy(x0[nv * K_MODES:], sigma, {"seed": seed * 100 + 99, "verbose": -9, "popsize": pop})
+    best = (np.inf, None, 0); n = 0; trace = []
+    while n + pop <= budget:
+        Xv = [es.ask() for es in ess]; Xs = ss.ask()
+        Fv = [[None] * pop for _ in range(nv)]; Fs = []
+        for j in range(pop):
+            x = np.concatenate([Xv[i][j] for i in range(nv)] + [Xs[j]])
+            v = sp.decode(x)
+            tot, per = f_full(v, tmp); n += 1
+            for i, a in enumerate(sp.arrays):
+                Fv[i][j] = float(np.mean(per[a.replace("area_", "")]))
+            Fs.append(tot)
+            if tot < best[0]:
+                best = (tot, v, n)
+        for i, es in enumerate(ess):
+            es.tell(Xv[i], Fv[i])
+        ss.tell(Xs, Fs)
+        trace.append(round(min(Fs), 5))
+        print(f"[opt-sep] evals {n}/{budget} gen-best {min(Fs):.4f} best {best[0]:.4f}", file=sys.stderr, flush=True)
+    return best, n, trace
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--parent", required=True)
@@ -80,6 +117,9 @@ def main():
     ap.add_argument("--milestone", default="M1")
     ap.add_argument("--budget", type=int, default=None)
     ap.add_argument("--sigma", type=float, default=0.15)
+    ap.add_argument("--seed", type=int, default=1, help="优化器随机种子；正式结果固定用 1，其余只用于估计优化器噪声")
+    ap.add_argument("--mode", default="separable", choices=["separable", "joint"],
+                    help="M1 默认用可分搜索（2026-11-24 起；此前 g001-e00、g001-e00r 用 joint）")
     a = ap.parse_args()
     import yaml, cma
     cfg = yaml.safe_load(open(os.path.join(REPO, "config.yaml")))
@@ -96,6 +136,22 @@ def main():
     f = objective_fn(a.milestone, tgt["tiers"])
     tmp = tempfile.mkdtemp(prefix="opt_")
     t0 = time.time()
+    if a.milestone == "M1" and a.mode == "separable":
+        fd = objective_fn(a.milestone, tgt["tiers"], with_diag=True)
+        f0, _ = fd(vals, tmp)
+        (bf, bv, bat), n, trace = separable_m1(sp, fd, budget - 1, a.sigma, tmp, a.seed)
+        n += 1
+        if f0 <= bf:
+            bf, bv, bat = f0, vals, 1
+        out = {"version": os.path.splitext(os.path.basename(a.out))[0], "parent": os.path.basename(a.parent),
+               "optimizer": {"method": "cma-es", "mode": "separable", "milestone": a.milestone, "evals": n,
+                             "budget": budget, "start_objective": f0, "best_objective": bf, "best_at_eval": bat,
+                             "dims": sp.dim, "trace_gen_best": [round(f0, 5)] + trace,
+                             "wall_min": round((time.time() - t0) / 60, 1)},
+               "values": bv}
+        json.dump(out, open(a.out, "w"), ensure_ascii=False, indent=1)
+        print(json.dumps(out["optimizer"]))
+        return
     f0, _ = f(vals, tmp)
     best = (f0, vals, 0)
     trace = [round(f0, 5)]

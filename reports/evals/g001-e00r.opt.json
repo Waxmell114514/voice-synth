@@ -1,0 +1,1 @@
+{"method": "cma-es", "milestone": "M1", "evals": 150, "budget": 150, "start_objective": 0.14831, "best_objective": 0.10017, "best_at_eval": 114, "dims": 40, "trace_gen_best": [0.14831, 0.11463, 0.10982, 0.11722, 0.11258, 0.10854, 0.11375, 0.10386, 0.10017, 0.10804], "wall_min": 6.7}
