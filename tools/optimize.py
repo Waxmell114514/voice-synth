@@ -21,6 +21,7 @@ TARGETS = {
            "scalars": ["tract_length_cm", "r_lip", "r_glottis", "wall_loss"], "tiers": ["T1"]},
 }
 K_MODES = 6
+VOWELS = ["a", "o", "e", "i", "u", "v"]
 
 
 def load(p):
@@ -79,34 +80,43 @@ def objective_fn(milestone, tiers, with_diag=False):
 
 
 def separable_m1(sp, f_full, budget, sigma, tmp, seed=1):
-    """M1 可分搜索：T1 = 各元音偏差之和，每个元音的共振峰基本只取决于自己的面积函数。
-    每个元音一个 CMA-ES（K_MODES 维），共用标量一个 CMA-ES；每次评估同时喂给全部搜索器
-    （元音搜索器用该元音的偏差，标量搜索器用总偏差）。总评估次数不变。"""
+    """M1 可分搜索：T1 = 各元音偏差之和，每个元音的共振峰基本只取决于自己的参数。
+    分块：元音 v 的块 = area_v 的余弦模态 + schema 中标了 "vowel": v 的标量；其余全部进共用块。
+    每块一个 CMA-ES；每次评估同时喂给全部搜索器（元音块用该元音的偏差，共用块用总偏差）。总评估次数不变。"""
     import cma
-    nv = len(sp.arrays)
     x0 = sp.x0()
+    blocks = {}
+    i = 0
+    for a in sp.arrays:
+        v = a[5:] if a.startswith("area_") and a[5:] in VOWELS else None
+        blocks.setdefault(v, []).extend(range(i, i + K_MODES)); i += K_MODES
+    for s_ in sp.scalars:
+        v = sp.sch[s_].get("vowel")
+        blocks.setdefault(v if v in VOWELS else None, []).append(i); i += 1
+    keys = [v for v in VOWELS if v in blocks] + ([None] if None in blocks else [])
     pop = 8
-    ess = [cma.CMAEvolutionStrategy(np.zeros(K_MODES), sigma, {"seed": seed * 100 + i, "verbose": -9, "popsize": pop})
-           for i in range(nv)]
-    ss = cma.CMAEvolutionStrategy(x0[nv * K_MODES:], sigma, {"seed": seed * 100 + 99, "verbose": -9, "popsize": pop})
+    ess = {k: cma.CMAEvolutionStrategy(x0[blocks[k]], sigma, {"seed": seed * 100 + j, "verbose": -9, "popsize": pop})
+           for j, k in enumerate(keys)}
     best = (np.inf, None, 0); n = 0; trace = []
     while n + pop <= budget:
-        Xv = [es.ask() for es in ess]; Xs = ss.ask()
-        Fv = [[None] * pop for _ in range(nv)]; Fs = []
+        X = {k: ess[k].ask() for k in keys}
+        F = {k: [] for k in keys}
+        tots = []
         for j in range(pop):
-            x = np.concatenate([Xv[i][j] for i in range(nv)] + [Xs[j]])
+            x = np.array(x0, dtype=float)
+            for k in keys:
+                x[blocks[k]] = X[k][j]
             v = sp.decode(x)
             tot, per = f_full(v, tmp); n += 1
-            for i, a in enumerate(sp.arrays):
-                Fv[i][j] = float(np.mean(per[a.replace("area_", "")]))
-            Fs.append(tot)
+            for k in keys:
+                F[k].append(tot if k is None else float(np.mean(per[k])))
+            tots.append(tot)
             if tot < best[0]:
                 best = (tot, v, n)
-        for i, es in enumerate(ess):
-            es.tell(Xv[i], Fv[i])
-        ss.tell(Xs, Fs)
-        trace.append(round(min(Fs), 5))
-        print(f"[opt-sep] evals {n}/{budget} gen-best {min(Fs):.4f} best {best[0]:.4f}", file=sys.stderr, flush=True)
+        for k in keys:
+            ess[k].tell(X[k], F[k])
+        trace.append(round(min(tots), 5))
+        print(f"[opt-sep] evals {n}/{budget} gen-best {min(tots):.4f} best {best[0]:.4f}", file=sys.stderr, flush=True)
     return best, n, trace
 
 
