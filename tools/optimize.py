@@ -71,7 +71,7 @@ def objective_fn(milestone, tiers, with_diag=False):
             pth = os.path.join(tmpdir, "cand.json")
             json.dump({"values": vals}, open(pth, "w"))
             summ, diags = RUN.evaluate("engine", pth, tiers, "opt", "dev", [0])
-            pen, per_pen, _ = PL.penalty(vals)
+            pen, per_pen, _ = PL.penalty(vals, pth)
             per = {v: float(np.mean(e)) + PL.LAMBDA * per_pen.get(v, 0.0)
                    for v, e in diags["T1.per_vowel_rel_error_F1F2F3"].items()}
             return summ["T1.formant_rel_error"]["mean"] + PL.LAMBDA * pen, per

@@ -9,7 +9,7 @@
 优化目标 = T1 + LAMBDA × 罚项，LAMBDA 事先固定为 0.1，此后不再调。
 M1 验收要求总罚项 < ACCEPT_MAX。
 """
-import sys, json
+import os, sys, json
 import numpy as np
 
 LAMBDA = 0.1
@@ -41,7 +41,23 @@ def vowel_penalty(A, v):
     return float(np.mean(list(terms.values()))), terms
 
 
-def penalty(vals):
+def engine_areas(vals, params_path=None):
+    """若当前目录的引擎能导出生成的元音面积函数（如 g002-e01 的发音模型），优先用它；否则用 area_* 参数。"""
+    if params_path:
+        try:
+            if os.getcwd() not in sys.path:
+                sys.path.insert(0, os.getcwd())
+            from engine.control.story_modes import export_vowel_areas
+            out = dict(vals)
+            out.update({k: list(v) for k, v in export_vowel_areas(params_path).items()})
+            return out
+        except ImportError:
+            pass
+    return vals
+
+
+def penalty(vals, params_path=None):
+    vals = engine_areas(vals, params_path)
     per, detail = {}, {}
     for v in VOWELS:
         k = f"area_{v}"
@@ -52,7 +68,8 @@ def penalty(vals):
 
 if __name__ == "__main__":
     vals = json.load(open(sys.argv[1]))["values"]
-    tot, per, det = penalty(vals)
+    tot, per, det = penalty(vals, sys.argv[1])
+    vals = engine_areas(vals, sys.argv[1])
     print(json.dumps({"penalty": round(tot, 5), "accept_max": ACCEPT_MAX, "pass": tot < ACCEPT_MAX,
                       "per_vowel": {k: round(x, 5) for k, x in per.items()},
                       "detail": {v: {k: round(x, 5) for k, x in d.items() if x > 0} for v, d in det.items()},
