@@ -1,5 +1,14 @@
 [
  {
+  "id": "g002-e06",
+  "params": "params/g002-e06.json",
+  "scores": {
+   "T1.formant_rel_error": 0.01634,
+   "T3.cer": 0.84461,
+   "T3.pinyin_err": 0.8217
+  }
+ },
+ {
   "id": "g000-e00",
   "params": "params/g0.json",
   "scores": {
