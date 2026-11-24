@@ -1,0 +1,5 @@
+{"id": "g001-e07c", "parent": "g001-e00s", "milestone": "M1",
+ "hypothesis": "e07b + 发音动作连续性：面积逐采样插值、面积与声门面积按 artic_tau_ms（10 ms）平滑、静音段提前摆好下一个声母的口形（消除共享关键帧处的面积突变尖峰）；使能型，不调参，用 g001-e00s 参数",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "与 g001-e00s 相同（0.0266 ± 0.003）",
+   "T3.cer": "明显低于 e07b 的 0.896，且低于主线 0.862", "context_failures": "< 5/138", "dynamic": "能量通过；咔哒指标 < 主线"},
+ "written_before_eval": true}
