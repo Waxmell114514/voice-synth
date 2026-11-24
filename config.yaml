@@ -26,6 +26,6 @@ escalate:
   prediction_miss_factor: 5
 budget:
   max_generations: 200
-  max_wall_hours: null           # 由人填写
+  max_wall_hours: 48             # 人填写（2026-11-24）
   max_parallel_workers: 6
-  max_spend: null                # 由人填写
+  max_spend: null                # 人确认：暂不设上限（2026-11-24）
