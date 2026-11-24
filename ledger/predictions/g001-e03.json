@@ -1,0 +1,14 @@
+{
+ "id": "g001-e03",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "按姿态可变的声道长度：每个元音目标带自己的喉位/唇突长度，声道以固定段长 Δ 和最大段数实现，有效长度由激活段数加声门端一段分数延迟（线性插值或一阶全通）决定，取代全句单一 tract_length_cm",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.006（区间 -0.002 ~ -0.012）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}

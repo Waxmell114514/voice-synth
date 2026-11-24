@@ -1,0 +1,14 @@
+{
+ "id": "g001-e01",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "女性非均匀轴向比例：把元音面积函数从男→女的均匀 0.85 缩放改为分区轴向重采样（喉/咽段压缩、口腔段伸长，以每个元音的咽/口分界为折点），即在面积函数之上增加一个沿声道轴的分段线性坐标变换",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.015（区间 -0.005 ~ -0.025，相对调参后的对照 g001-e00）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}

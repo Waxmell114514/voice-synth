@@ -1,0 +1,15 @@
+{
+ "id": "g001-e07",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "用按气流计算的湍流噪声源（强度 ∝ 流速³·√面积，准静态气动模型提供清辅音段气流）取代临时的噪声增益",
+ "prediction": {
+  "metric": "context_check.measure_failures",
+  "delta": "由 ~25/138 降到 < 8/138",
+  "T1": "不变（|ΔT1| < 0.005，孤立元音无辅音）",
+  "levels": "爆破帧比元音低 15–45 dB（父版本高 34 dB）",
+  "T3.cer": "下降（辅音被听成零声母的比例减少），幅度不确定，方向预测为降"
+ },
+ "source": "orchestrator（依据独立检查发现的电平 bug）",
+ "written_before_eval": true
+}

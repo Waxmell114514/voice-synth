@@ -1,0 +1,14 @@
+{
+ "id": "g001-e02",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "开相声源-声道耦合：声门端反射系数由常数 r_glottis 改为随 LF 周期变化的 r_g(t)，按声门面积波形（由 LF 气流导出）计算声门阻抗 Zg(t) 与第 1 段特性阻抗的失配，开相时声门部分开放、闭相时近似全反射",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.006（区间 0 ~ -0.012）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}

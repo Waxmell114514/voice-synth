@@ -1,0 +1,14 @@
+{
+ "id": "g001-e05",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "声门下声道：在声门之后接一段气管/支气管管道（约 10–15 段，远端为吸收性终端），通过由 LF 声门面积驱动的时变声门结点与声道耦合，产生声门下共振（女性 Sg1≈700、Sg2≈1500 Hz 附近）及其与 F1/F2 的相互作用",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.002（区间 +0.005 ~ -0.010）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}

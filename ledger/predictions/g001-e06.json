@@ -1,0 +1,14 @@
+{
+ "id": "g001-e06",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "随舌位高低变化的软腭口：每个元音目标带自己的腭咽口面积 A_vp（低元音软腭较低、口元音也有少量鼻腔耦合），经已有的鼻腔三端口结点耦合，取代口元音一律 A_vp=0",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.002（区间 +0.004 ~ -0.008）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}

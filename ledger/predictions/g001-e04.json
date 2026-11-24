@@ -1,0 +1,14 @@
+{
+ "id": "g001-e04",
+ "parent": "g000-e00",
+ "milestone": "M1",
+ "hypothesis": "按截面积分布的频变损耗：用每段一阶低通损耗滤波（系数随 1/√A_k 与周长变化，模拟黏滞与热传导边界层损耗 ∝ √f）取代所有段、所有频率统一的 (1−wall_loss) 衰减",
+ "prediction": {
+  "metric": "T1.formant_rel_error",
+  "delta": "-0.003（区间 +0.002 ~ -0.008）"
+ },
+ "compare_to": "调参后的对照组 g001-e00s（T1 0.0266，可分优化器，种子 1）",
+ "note": "Planner 原预测相对于旧对照组（联合优化器）；对照组更换后数值保持不变，原样作为预测",
+ "source": "reports/gen_001_plan.json",
+ "written_before_eval": true
+}
