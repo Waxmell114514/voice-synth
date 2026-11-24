@@ -1,0 +1,5 @@
+{"id": "g002-e01", "parent": "g002-e00", "milestone": "M1",
+ "hypothesis": "用 Story 女声模态模型（Ω + q1φ1 + q2φ2，加唇口与舌背收紧覆盖层）生成元音面积函数，取代逐段自由的面积；与带罚项的对照组 g002-e00p 同协议比较",
+ "prediction": {"metric": "T1.formant_rel_error", "delta": "与 g002-e00p 相差 ±0.01 以内（自由度少，但形状天然合理，罚项几乎不起作用）",
+   "penalty": "< 0.005", "context": "语境检查偏差与 T1 相差 < 0.01（低维模型泛化更好）", "T3.cer": "不差于 g002-e00p"},
+ "written_before_eval": true}
