@@ -1,0 +1,5 @@
+{"id": "g000-e00", "parent": null, "milestone": "M1",
+ "hypothesis": "种子引擎：LF 声源 + 44 段 KL 声道（含鼻腔支路）+ Story 2008 元音面积函数 + 查表线性插值前端，未调参",
+ "prediction": {"metric": "T1.formant_rel_error", "value": "0.15 ± 0.01（opt 集已测 0.149）",
+                "others": "T2 音节准确率 < 0.15，T3 CER > 0.85，T4 综合分 < 0.05：辅音和韵律未调，几乎听不懂"},
+ "written_before_eval": true}
