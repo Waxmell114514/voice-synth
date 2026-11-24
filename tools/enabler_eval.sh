@@ -11,7 +11,7 @@ for f in $(cd "$MAIN" && git ls-files eval); do cmp -s "$MAIN/$f" "$WT/$f" || { 
 python3 "$MAIN/tools/evallock.py" verify >/dev/null
 cp "$PRM" "$OUT/$ID.params.json"
 python3 eval/run.py --params "$PRM" --tiers "$TIERS" --set dev --experiment "$ID" > "$OUT/$ID.dev.json" 2> "$OUT/$ID.log"
-python3 "$MAIN/tools/context_vowel_check.py" "$PRM" > "$OUT/$ID.context.json" 2>> "$OUT/$ID.log"
+python3 tools/context_vowel_check.py "$PRM"   # 必须用被测工作树里的工具（它加载所在树的引擎） > "$OUT/$ID.context.json" 2>> "$OUT/$ID.log"
 python3 "$MAIN/tools/dynamic_t0_check.py" "$PRM" --parent-root "$MAIN" --parent-params "$PRM" > "$OUT/$ID.dynamic.json" 2>> "$OUT/$ID.log"
 python3 - "$OUT" "$ID" <<'PY'
 import json, sys
