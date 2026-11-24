@@ -1,5 +1,5 @@
-/home/user/voice-synth/.claude/worktrees/agent-ab13484ef65d4a6d3 g002-e02 /home/user/voice-synth/reports/evals/g002-e01.params.json
-/home/user/voice-synth/.claude/worktrees/agent-a05503f116d22a871 g002-e03 /home/user/voice-synth/params/g002-e00p.json
-/home/user/voice-synth/.claude/worktrees/agent-a67fb69af90baab3e g002-e04 /home/user/voice-synth/params/g002-e00p.json
-/home/user/voice-synth/.claude/worktrees/agent-ac9d4dd09c51e7359 g002-e05 /home/user/voice-synth/reports/evals/g002-e05.parent-projected.json
-END
+# done /home/user/voice-synth/.claude/worktrees/agent-ab13484ef65d4a6d3 g002-e02 /home/user/voice-synth/reports/evals/g002-e01.params.json
+# done /home/user/voice-synth/.claude/worktrees/agent-a05503f116d22a871 g002-e03 /home/user/voice-synth/params/g002-e00p.json
+# done /home/user/voice-synth/.claude/worktrees/agent-a67fb69af90baab3e g002-e04 /home/user/voice-synth/params/g002-e00p.json
+# done /home/user/voice-synth/.claude/worktrees/agent-ac9d4dd09c51e7359 g002-e05 /home/user/voice-synth/reports/evals/g002-e05.parent-projected.json
+# done END

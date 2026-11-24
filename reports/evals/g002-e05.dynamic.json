@@ -1,0 +1,26 @@
+{
+ "energy": [
+  {
+   "corner": 0,
+   "max_rel_rise_per_sample": -3.8653954670190693e-109,
+   "pass": true
+  },
+  {
+   "corner": 1,
+   "max_rel_rise_per_sample": -2.255266674784942e-09,
+   "pass": true
+  }
+ ],
+ "clicks": {
+  "velum": {
+   "this": 2.946802482888967
+  },
+  "vowels": {
+   "this": 3.1942105321304286
+  },
+  "mixed": {
+   "this": 35.17353289079905
+  }
+ },
+ "energy_pass": true
+}
