@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+eval/models/
+eval/data/
+eval/cache/
+*.wav
+!listening/**/*.wav

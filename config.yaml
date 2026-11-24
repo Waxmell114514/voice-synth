@@ -1,0 +1,31 @@
+language: zh-CN
+auto_freeze: true
+freeze_checks:
+  human_beats_baseline_on_every_metric: true
+  human_T3_cer_max: 0.05        # 初始
+generation:
+  k_hypotheses: 6
+  min_targeting_worst_diagnostic: 3
+  min_exploratory: 1
+  population_size: 8
+  listening_every: 5
+  stall_generations: 6
+optimizer:
+  method: cma-es
+  evals_per_variant: 150
+  dev_subset_sentences: 30
+eval_quota_per_experiment: 2
+param_cap: 3000
+gates:                           # 全部为初始值，阶段 0.3 校准后修改一次
+  M1_formant_rel_error_max: 0.10
+  M2_syllable_acc_min: 0.90
+  M2_tone_acc_min: 0.90
+  M3_dev_cer_max: 0.10
+escalate:
+  single_gen_main_metric_jump: 0.15
+  prediction_miss_factor: 5
+budget:
+  max_generations: 200
+  max_wall_hours: null           # 由人填写
+  max_parallel_workers: 6
+  max_spend: null                # 由人填写
