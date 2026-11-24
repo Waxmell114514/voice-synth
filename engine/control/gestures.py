@@ -8,7 +8,7 @@
   voice[nf]   发声幅度（0–1）
   ag[nf]      准静态声门面积（cm²；0 = 无气流，静音段）
   f0[nf]      基频（Hz）
-辅音 = 叠加在后接元音面积函数上的收紧（预期性协同发音）。
+辅音 = 乘在后接元音面积函数上的收紧因子（Story 2005 Tier II；预期性协同发音）。
 所有数值来自 params（见 params/schema.json 与 specs/g0-seed.md）。
 """
 import numpy as np
@@ -43,15 +43,36 @@ CHAO = {1: [5, 5], 2: [3, 5], 3: [2, 1, 4], 4: [5, 1]}
 NEUTRAL_AFTER = {1: 2, 2: 3, 3: 4, 4: 1, 5: 2}
 
 
-def constrict(base, place_frac, width, area, mode="min"):
-    """在距唇 place_frac（占声道长度的比例）处施加宽度 width（段数，高斯）的收紧。"""
+N_STORY = 44   # Story 2005 / Story 等 2018 模型的段数；r_c 以该段长为单位（按归一化位置换算到引擎段数）
+
+
+def constrict(base, place_frac, rc, area, sc=1.0, mc=1.0, mode="min"):
+    """辅音收紧：Story 2005 Tier II 乘法叠加（JASA 117:3231 Eq.1、5–9；specs/g002-e01.md §1.2、§6）。
+        A(i) = V(i)·C(i)，C(i) = max(0, 1 − m_c·d_c·exp(−ln16·((i − l_c)/r)²))，d_c = 1 − a_c/V(l_c)，
+        r = r_b = r_c/(1+s_c)（i < l_c，声门侧）或 r_f = s_c·r_c/(1+s_c)（i ≥ l_c，唇侧）。
+    收紧两侧保留元音面积的比例形状 V(i)/V(l_c)（g002-e06），取代旧的加法混合 V·(1−m) + a·m。
+    l_c 取距唇 place_frac 处最近的段（与噪声注入段 place_index 同一取整），m_c ≥ 1 时 l_c 处恰好为 a_c；
+    m_c > 1 时 C 被截断为 0 的那几段取 a_c（Story 的闭塞“摊开”，但最窄面积仍是给定的 area，
+    与 g001-e07 起“收紧达到给定面积”的性质一致）。mode="min"：不扩张元音（与旧版相同）。"""
+    base = np.asarray(base, float)
     N = len(base)
-    c = (N - 1) * (1.0 - place_frac)
-    k = np.arange(N)
-    m = np.exp(-0.5 * ((k - c) / max(width, 0.3)) ** 2)
-    m = m / m.max()   # 最窄处恰好达到给定面积（c 非整数时高斯峰不在段中心；g001-e07：噪声电平依赖实际收紧面积）
-    tgt = base * (1 - m) + area * m
+    l = int(round((N - 1) * (1.0 - place_frac)))
+    l = int(np.clip(l, 0, N - 1))
+    s = N / N_STORY
+    k = np.arange(N, dtype=float)
+    r = np.where(k < l, rc / (1.0 + sc), sc * rc / (1.0 + sc)) * s
+    g = np.exp(-np.log(16.0) * ((k - l) / np.maximum(r, 1e-6)) ** 2)
+    dc = 1.0 - area / max(base[l], 1e-9)
+    C = np.maximum(1.0 - mc * dc * g, 0.0)
+    tgt = base * C
+    if dc > 0:
+        tgt = np.maximum(tgt, area)
     return np.minimum(base, tgt) if mode == "min" else tgt
+
+
+def _cshape(P, place):
+    """部位 place 的 Story 收紧形状参数 (r_c, s_c, m_c)。"""
+    return P[f"cons_rc_{place}"], P[f"cons_sc_{place}"], P[f"cons_mc_{place}"]
 
 
 def noise_G(P, place):
@@ -193,10 +214,11 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
     # ---------------- 声母
     if ini:
         place, manner = INIT[ini]
-        pf, w = P[f"place_{place}"], P[f"cwidth_{place}"]
+        pf = P[f"place_{place}"]
+        rc, sc, mc = _cshape(P, place)
         ci = place_index(P, place)
         if manner in ("stop_u", "stop_a", "affr_u", "affr_a"):
-            clo = constrict(first, pf, w, P["closure_area"])
+            clo = constrict(first, pf, rc, P["closure_area"], sc, mc)
             asp_ = manner.endswith("_a")
             ag = P["ag_abduct_cm2" if asp_ else "ag_unasp_cm2"]
             G = noise_G(P, place)
@@ -207,12 +229,12 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
             if manner.startswith("stop"):
                 # 除阻：爆破噪声 + （送气）
                 vot = P["vot_asp_ms" if asp_ else "vot_unasp_ms"] * ms
-                rel = constrict(first, pf, w, P["release_area"])
+                rel = constrict(first, pf, rc, P["release_area"], sc, mc)
                 tl.key(t + 0.001, rel, nidx=ci, ngain=G * 10.0 ** P["noise_g_burst_log10"], voice=0.0, ag=ag)
                 t += vot
                 tl.key(t, first, voice=0.0, ag=ag)
             else:
-                fr = constrict(first, pf, w, P["fric_area"])
+                fr = constrict(first, pf, rc, P["fric_area"], sc, mc)
                 dfr = P["dur_affr_fric_asp_ms" if asp_ else "dur_affr_fric_unasp_ms"] * ms
                 tl.key(t + 0.001, fr, nidx=ci, ngain=G, voice=0.0, ag=ag)
                 t += dfr
@@ -220,7 +242,7 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
                 t += 0.01
                 tl.key(t, first, voice=0.0, ag=ag)
         elif manner in ("fric", "fric_h"):
-            fr = constrict(first, pf, w, P["fric_area"] if manner == "fric" else P["fric_area_h"])
+            fr = constrict(first, pf, rc, P["fric_area"] if manner == "fric" else P["fric_area_h"], sc, mc)
             G = noise_G(P, place)
             ag = P["ag_abduct_cm2"]
             dfr = P["dur_fric_ms"] * ms
@@ -230,13 +252,13 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
             t += 0.01
             tl.key(t, first, voice=0.0, ag=ag)
         elif manner == "nasal":
-            clo = constrict(first, pf, w, P["closure_area"])
+            clo = constrict(first, pf, rc, P["closure_area"], sc, mc)
             dn = P["dur_nasal_init_ms"] * ms
             tl.key(t, clo, Avp=P["velum_open_area"], voice=1.0)
             t += dn
             tl.key(t, clo, Avp=P["velum_open_area"], voice=1.0)
         else:  # lateral / approx
-            ap = constrict(first, pf, w, P["approx_area_l" if manner == "lateral" else "approx_area_r"])
+            ap = constrict(first, pf, rc, P["approx_area_l" if manner == "lateral" else "approx_area_r"], sc, mc)
             da = P["dur_approx_ms"] * ms
             tl.key(t, ap, voice=1.0)
             t += da
@@ -256,7 +278,8 @@ def _syllable(tl, P, V, t0, D, ini, fin, tone, prev_tone, is_last):
     tl.key(tend, V[vtg[-1]], voice=1.0)
     if coda:
         place = "alv" if coda == "N" else "vel"
-        clo = constrict(V[vtg[-1]], P[f"place_{place}"], P[f"cwidth_{place}"], P["closure_area"])
+        clo = constrict(V[vtg[-1]], P[f"place_{place}"], P[f"cons_rc_{place}"], P["closure_area"],
+                        P[f"cons_sc_{place}"], P[f"cons_mc_{place}"])
         tl.key(tend + 0.02, clo, Avp=P["velum_open_area"], voice=1.0)
         tend = t + rest
         tl.key(tend, clo, Avp=P["velum_open_area"], voice=1.0)
