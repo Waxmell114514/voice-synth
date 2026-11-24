@@ -8,3 +8,5 @@
 {"time": "2026-11-24T11:08:02", "experiment": "g001-e03", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "4384ef68bc5dd457"}
 {"time": "2026-11-24T11:20:48", "experiment": "g001-e04", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "cde1ab3987cc91ac"}
 {"time": "2026-11-24T11:49:12", "experiment": "g002-e00", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "a8353f70f45f08b9"}
+{"time": "2026-11-24T11:52:06", "experiment": "g001-e07a", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "98f95241f950877c"}
+{"time": "2026-11-24T11:55:01", "experiment": "g001-e07b", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "98f95241f950877c"}
