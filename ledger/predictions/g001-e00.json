@@ -1,0 +1,4 @@
+{"id": "g001-e00", "parent": "g000-e00", "milestone": "M1",
+ "hypothesis": "对照组：不改结构，只用 CMA-ES（150 次，40 维：6 个元音各 6 个对数面积余弦模态 + 声道长度、唇/声门反射、壁损耗）调参",
+ "prediction": {"metric": "T1.formant_rel_error", "delta": "-0.04（0.149 → 约 0.11，区间 0.09–0.13）"},
+ "written_before_eval": true}
