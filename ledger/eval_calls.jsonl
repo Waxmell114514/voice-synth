@@ -22,3 +22,5 @@
 {"time": "2026-11-25T07:57:16", "experiment": "g003-e00", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "261ec6dfb60f082c"}
 {"time": "2026-11-25T08:26:59", "experiment": "g003-e01", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "5e5d309e40c9c4a9"}
 {"time": "2026-11-25T08:56:26", "experiment": "g003-e03", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "ae9ccc408c0135cd"}
+{"time": "2026-11-25T09:28:09", "experiment": "g003-e06", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "e00d4b87c09eed11"}
+{"time": "2026-11-25T09:31:23", "experiment": "g003-e04", "set": "dev", "suite": "dev", "tiers": ["T0", "T1", "T3"], "params_sha256": "9c11cae2aafcbc0c"}
