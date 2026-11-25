@@ -1,0 +1,18 @@
+{
+ "params": "params/g003-e00.json",
+ "context_formant_rel_error": {
+  "mean": 0.02968,
+  "std": 0.00028
+ },
+ "per_vowel_mean": {
+  "a": 0.0217,
+  "o": 0.0273,
+  "e": 0.0224,
+  "i": 0.0195,
+  "u": 0.0324,
+  "v": 0.0541
+ },
+ "n_syllables": 138,
+ "measure_failures": 0,
+ "note": "非正式独立检查：语境音节未参与优化"
+}

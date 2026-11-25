@@ -1,0 +1,40 @@
+{
+ "energy": [
+  {
+   "corner": 0,
+   "max_rel_rise_per_sample": -3.0280433812851074e-102,
+   "pass": true
+  },
+  {
+   "corner": 1,
+   "max_rel_rise_per_sample": -4.63429339610445e-09,
+   "pass": true
+  }
+ ],
+ "clicks": {
+  "velum": {
+   "this": 3.2894078491699714
+  },
+  "vowels": {
+   "this": 3.7228651263475583
+  },
+  "mixed": {
+   "this": 23.979697803630398
+  },
+  "lensweep": {
+   "this": 4.697617744934329,
+   "lambda1": 3.7612459142632573,
+   "overrides": {
+    "len_ratio_a": 0.85,
+    "len_ratio_e": 0.85,
+    "len_ratio_i": 1.2,
+    "len_ratio_o": 1.2,
+    "len_ratio_u": 0.85,
+    "len_ratio_v": 1.2
+   },
+   "max_ratio": 1.5,
+   "pass": true
+  }
+ },
+ "energy_pass": true
+}
