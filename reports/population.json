@@ -6,7 +6,9 @@
    "T1.formant_rel_error": 0.01634,
    "T3.cer": 0.84461,
    "T3.pinyin_err": 0.8217
-  }
+  },
+  "penalty": 0.0054,
+  "note": "第 3 代未被取代"
  },
  {
   "id": "g000-e00",
