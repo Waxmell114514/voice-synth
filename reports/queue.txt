@@ -1,6 +1,6 @@
-/home/user/voice-synth/.claude/worktrees/control-g003 g003-e00 /home/user/voice-synth/params/g002-e06.json
-/home/user/voice-synth/.claude/worktrees/agent-a212a40a18e932064 g003-e01 /home/user/voice-synth/params/g002-e06.json
-/home/user/voice-synth/.claude/worktrees/agent-a2e3faba4d37596c6 g003-e03 /home/user/voice-synth/params/g002-e06.json
+# done /home/user/voice-synth/.claude/worktrees/control-g003 g003-e00 /home/user/voice-synth/params/g002-e06.json
+# done /home/user/voice-synth/.claude/worktrees/agent-a212a40a18e932064 g003-e01 /home/user/voice-synth/params/g002-e06.json
+# done /home/user/voice-synth/.claude/worktrees/agent-a2e3faba4d37596c6 g003-e03 /home/user/voice-synth/params/g002-e06.json
 /home/user/voice-synth/.claude/worktrees/agent-ac90e2599bcc62cbf g003-e06 /home/user/voice-synth/params/g002-e06.json
 /home/user/voice-synth/.claude/worktrees/agent-adfa0a1b21ea3417a g003-e04 /home/user/voice-synth/params/g002-e06.json enabler
 END
