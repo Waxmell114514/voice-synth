@@ -1,0 +1,8 @@
+{"item": "C01", "role": "REPRODUCE", "verdict": "reject",
+ "claim_summary": "用对奇数 k 的强归纳（假设所有小于等于 k−2 的奇数都在 E 中，证明 k ∈ E）给出 3x+1 猜想的初等证明：对每个正整数 x，存在 m 使 g^m(x)=1。",
+ "error_quote": "When p + q > 2, by Case 2 we obtain that f (k) ∈ E, and again",
+ "error_reason": "Case 1 和 Case 2 本身是成立的（我用整数精确检查了 k<200000）：Case 1 中 f(k)≤(3k+1)/4<k；Case 2 中 k≡2 (mod 3)，前驱 k̄=(2k−1)/3<k，且 f(k̄)=k。但这两个情形都只在“归纳假设覆盖所有小于当前数的奇数”时才能用。Case 3（p≥2，3∤h）里 3k+1=3·2^p h−2，所以 f(k)=(3k+1)/2=2^{p−1}·3h−1>k（因为 h 是奇数，作者写的 2^q 只能取 q=0，h′=h）。作者接着把 Case 1/Case 2 用到 f(k) 这个比 k 更大的数上，而当前的归纳假设只覆盖小于等于 k−2 的奇数，覆盖不到 f(k)。具体看两个子情形。(a) p+q>2，即同句的 Case 2：f(k) 的前驱 (2f(k)−1)/3 恰好就是 k 本身，所以“k̄∈E 由归纳假设得到”在这里实际是在假设 k∈E，是循环论证。在 k<200000 的 33290 个 Case 3 数里，16645 个属于这个子情形，例如 k=271，f(k)=407，pred(407)=271。(b) p+q=2，即前一句 “When p + q = 2, by Case 1 we obtain that f (k) ∈ E.”：Case 1 需要 f(f(k))∈E，可是 f(f(k)) 常常大于 k−2，例如 k=267，f(k)=401，f(f(k))=301>265，不在归纳假设范围内，在 33290 个里有 8323 个是这样。所以 Case 3 没有被证明，归纳不成立。这正是“把停时有限当作已知”的偷换。",
+ "taxonomy": ["E03", "E02", "E08"],
+ "control_check": "命令：python3 c01.py，对 261≤k<200000 的奇数按 k=2^p h−1 分类。输出：'case1 f(k)<k: True case2 pred valid: True'；'case3 count 33290 q!=0 count 0'；'case3->Case2: predecessor of f(k) equals k: 16645'；'case3->Case1: f(f(k))>k-2 (outside IH): 8323'；样例 267 (2,67) f(k)=401 (1,201) f(f(k))=301；271 (4,17) f(k)=407 (3,51) pred(f(k))=271。对照映射 3n−1 的奇数映射：f(5)=7，f(7)=5，而 7 的前驱 (2·7+1)/3=5。这说明同样的“把 Case 2 用到 f(k) 上、取它的前驱”只会回到 k 本身，在 3n−1 的圈 5→7→5 上就会循环地‘证明’5∈E。真正在对照映射上失效的是 Case 1/2 的大小比较，而 Case 3 的错误与映射无关：它把归纳假设用在了大于 k 的数上。",
+ "confidence": 0.95,
+ "lesson": "强归纳证明里要核对每次调用归纳假设时的那个数是否确实小于当前的 k；在 3x+1 中，k≡2 (mod 3) 之外的情形（Case 3）里 f(k)=(3k+1)/2>k，而且 f(k) 的前驱就是 k 本身，在这里套用较小情形的结论就是循环论证。"}
