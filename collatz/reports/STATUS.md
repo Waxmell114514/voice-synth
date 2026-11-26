@@ -1,21 +1,24 @@
-# STATUS（覆盖写）— 2026-11-26 约 10:30 UTC
+# STATUS（覆盖写）— 2026-11-26，人要求“先都暂停”
 
-启动时间：2026-11-26 约 09:42 UTC。预算 72 小时，截止约 2026-11-29 09:42 UTC。
+**停在哪**：阶段 0.3（Critic 三人组校准）进行中，同时提前开工的 0.5 图谱 D1a 和 0.6 种子库 R1–R3。
+**为什么**：人下令暂停。所有后台子 agent 已停止，没有残留的 lean/lake 进程，没有新任务排队执行。
 
-## 阶段 0 进度
-- 0.1 预检：完成，见 reports/preflight.md。Lean 4.33.1 + mathlib v4.33.1 可用，arXiv 可用，期刊全文访问有限。
-- 0.2 statement/、verify.sh、roles/、config.yaml：完成。
-- 0.3 裁判校准：verify.sh 25 个样本（26 次检查）全部判对（冻结前用最终版完整重跑一次）。
-  Critic 三人组校准：语料构建中（10 错 + 10 对，盲）。
-- 0.4 冻结：未做，等 Critic 校准。
-- 0.5 图谱：D1a（停时、密度、概率模型）已开始。与 bootstrap 顺序的偏差：为节省时间，图谱在冻结前开工；
-  它不依赖冻结内容，若冻结检查失败，图谱的产出照样保留，舰队按规定停下。
-- 0.6 种子库：R1（三种映射等价）、R2（n ≤ N₀ 内核检查）+ R3（对照圈）的 Prover 在独立工作树里跑。预测已先写入 ledger/predictions/。
+## 已完成并已推送
+- 0.1 预检（reports/preflight.md）；0.2 statement/、verify.sh、roles/、config.yaml。
+- 0.3 verify.sh 校准：25 个样本 26 次检查全部判对（冻结前需用最终版完整重跑一次）。
+- 0.3 Critic 校准语料：20 份盲审材料与 60 份提示词（calibration/critic_corpus、critic_prompts）。
+  答案表在仓库外：scratchpad/critic_key.json（容器回收即丢失；恢复前应决定是否先提交）。
+- Critic 结果：60 次中完成 2 次（C01.REPRODUCE、C01.NOVELTY，都是 reject，错处与答案表一致）。
 
-## 后台任务
-| 任务 | 状态 |
+## 被中断、未保存或未完成
+| 任务 | 中断时状态 |
 |---|---|
-| Critic 校准语料构建 | 运行中 |
-| Prover g000-R1 | 运行中（独立工作树） |
-| Prover g000-R2 + R3 | 运行中（独立工作树） |
-| Cartographer D1a | 运行中 |
+| Critic C01.CRITERION | 中断，无输出；队列剩 57 次（scratchpad/critic_queue.txt） |
+| Prover g000-R1 | 工作树 `.claude/worktrees/agent-a43143ce6a99ad11c` 里有未提交、未验证的 lib/Lib/Seed/R1.lean（227 行）和 routes/seed.md |
+| Prover g000-R2 + R3 | 工作树已被自动清理，无产出保留 |
+| Cartographer D1a | 仓库内无产出保留（atlas/domains/D1a 未生成） |
+
+## 恢复时需要人决定
+1. 是否继续，从哪一步继续（建议：先跑完 Critic 校准，它是冻结的前置条件）。
+2. 72 小时预算是否从暂停起停表。
+3. 种子库和图谱是否仍在冻结前并行开工，还是严格按 0.3 → 0.4 → 0.5 → 0.6 顺序。
