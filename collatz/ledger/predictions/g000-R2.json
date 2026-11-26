@@ -1,0 +1,20 @@
+{
+ "id": "g000-R2",
+ "parent": null,
+ "route": "seed",
+ "written_at": "2026-11-26T10:18:32Z",
+ "hypothesis": "对 0 < n ≤ N₀ 猜想成立，内核可检查（不用 native_decide），N₀ 由产能决定",
+ "cell": [
+  "原始迭代",
+  "（种子库 T1）"
+ ],
+ "prediction": {
+  "holds": true,
+  "confidence": 0.95,
+  "falsified_if": "N₀ ≥ 10⁴ 时内核检查在 1 小时内完不成"
+ },
+ "control": {
+  "3n-1": "同样的程序在 3n−1 上会在 n=5 处失败（5 在非平凡圈上）",
+  "5n+1": "在 n=13 处失败"
+ }
+}

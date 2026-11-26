@@ -1,0 +1,20 @@
+{
+ "id": "g000-R1",
+ "parent": null,
+ "route": "seed",
+ "written_at": "2026-11-26T10:18:32Z",
+ "hypothesis": "原始映射、捷径映射 T(n)=n/2 或 (3n+1)/2、Syracuse 奇数映射三种表述的猜想彼此等价（LEAN）",
+ "cell": [
+  "原始迭代",
+  "（种子库 T1）"
+ ],
+ "prediction": {
+  "holds": true,
+  "confidence": 0.97,
+  "falsified_if": "三种表述之一的等价在 Lean 中无法建立，或需要额外假设"
+ },
+ "control": {
+  "3n-1": "等价本身对 3n−1 同样成立（这是纯表述变换，不推进猜想）",
+  "5n+1": "同上"
+ }
+}

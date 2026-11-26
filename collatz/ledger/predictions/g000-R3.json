@@ -1,0 +1,20 @@
+{
+ "id": "g000-R3",
+ "parent": null,
+ "route": "seed",
+ "written_at": "2026-11-26T10:18:32Z",
+ "hypothesis": "对照映射上的圈：3n−1 的 5 圈与 17 圈，5n+1 的 13 圈，3n+1 在负整数上的 −1、−5、−17 圈（LEAN）",
+ "cell": [
+  "无非平凡圈",
+  "（对照映射）"
+ ],
+ "prediction": {
+  "holds": true,
+  "confidence": 0.99,
+  "falsified_if": "任何一个圈的长度或成员与 bootstrap 所写不符"
+ },
+ "control": {
+  "3n-1": "这条本身就是对照",
+  "5n+1": "这条本身就是对照"
+ }
+}
