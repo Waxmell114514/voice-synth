@@ -1,0 +1,3 @@
+.lake/
+*.olean
+experiments/**/out/

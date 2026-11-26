@@ -1,0 +1,26 @@
+auto_freeze: true                # 人设定（2026-11-26）。须满足 freeze_checks 的全部条件
+freeze_checks:
+  statement_matches_upstream: true     # Statement.lean 与 formal-conjectures 原文件逐字一致
+  verify_sh_all_samples_correct: true  # 0.3 的应通过、应拒绝样本全部判对
+  critic_panel_calibrated: true        # 0.3 的 20 份证明，Critic 三人组全部判对
+generation:
+  k_hypotheses: 8
+  min_targeting_largest_gap: 3
+  min_far_field: 2               # 来自离 Collatz 文献最远的列
+  population_size: 6             # 攻击路线条数
+  stall_generations: 6
+  atlas_refresh_every: 5
+atlas:
+  min_nodes_read_in_full: 300    # 初始；阶段 0.5 按实际文献量改一次，此后不再改
+  max_unchecked_cells_ratio: 0.2
+  audit_sample: 40
+  audit_max_error_rate: 0.05
+critic:
+  panel_size: 3
+  prediction_miss_escalate: true
+  always_escalate_from_tier: T3
+budget:
+  max_generations: 200
+  max_wall_hours: 72             # 人填写（2026-11-26）。从启动算起，含阶段 0
+  max_parallel_workers: 4        # 人填写（2026-11-26）。超出的子 agent 排队
+  max_spend: null                # 人确认：不设上限，只限运行时间（2026-11-26）

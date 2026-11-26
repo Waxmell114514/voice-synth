@@ -1,0 +1,16 @@
+{
+ "version": 1,
+ "frozen": false,
+ "files": {
+  "lake-manifest.json": "a5248a8b45b0906d23f925533d7a8fa6b524d2393e3dee2e0b4ca02e06ad1b0b",
+  "lakefile.toml": "ac75cbe03b3fc60d8756df9e06fe38cf095ba1c1e9a57175bba548e03c566c7c",
+  "lean-toolchain": "3aac669c7a910ec2389f4e4f921b605adf6ebf2d1e0c9b9cd0be4d33f3f5db71",
+  "statement/Final.lean": "c9315d065be90e7f035efe0e5ceba6e012381010628401f7c2cd8bb676ab511d",
+  "statement/Inspect.lean.in": "5d6fd49585b85c3754a3bdaad01f044749092134ffd4f6d9762fb3476973d3e3",
+  "statement/README.md": "aa700ab392fcfa508b2f62c9d4e01c2971cdeb7251ddd4b5ada7b333da2da9ac",
+  "statement/Statement.lean": "ded619d400cda13d56f7542221646f83901beb827ae7dfa7c3c78b174fab1307",
+  "statement/upstream/CollatzConjecture.lean": "2b95a1e3c230d810703bd3151d6a7aa8544844b38c47466bd05c76fdeecedc1c",
+  "statement/verify.py": "c203ea73daa75ef236ba0f5f04f2812b71182f3d4b27a324866cd64db28ed3c5",
+  "statement/verify.sh": "7c96954e3e87633d72b99eae742d0681e4fc03e7fa4a003e028540f299a0e55f"
+ }
+}

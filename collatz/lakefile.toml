@@ -1,0 +1,15 @@
+name = "collatz"
+defaultTargets = ["Statement", "Lib"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "v4.33.1"
+
+[[lean_lib]]
+name = "Statement"
+srcDir = "statement"
+
+[[lean_lib]]
+name = "Lib"
+srcDir = "lib"

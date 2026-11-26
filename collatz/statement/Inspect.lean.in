@@ -1,0 +1,51 @@
+/-
+Frozen template used by statement/verify.py. The placeholder __THM__ is replaced by the
+theorem's full name. Prints one tab-separated `VERIFY<TAB>key<TAB>value` line per fact.
+-/
+import Statement
+import Lib
+open Lean Meta Elab Command
+
+private def kindOf : ConstantInfo → String
+  | .axiomInfo _ => "axiom"
+  | .defnInfo _ => "def"
+  | .thmInfo _ => "theorem"
+  | .opaqueInfo _ => "opaque"
+  | .quotInfo _ => "quot"
+  | .inductInfo _ => "inductive"
+  | .ctorInfo _ => "ctor"
+  | .recInfo _ => "recursor"
+
+#eval show CommandElabM Unit from do
+  let env ← getEnv
+  let out (k v : String) : CommandElabM Unit := logInfo m!"VERIFY\t{k}\t{v}"
+  let thm := "__THM__".toName
+  -- every constant declared in a Lib module: name, kind (for axiom registry and shadowing)
+  for h : i in [0:env.header.moduleNames.size] do
+    let m := env.header.moduleNames[i]
+    if (`Lib).isPrefixOf m then
+      let md := env.header.moduleData[i]!
+      for c in md.constants do
+        out "libconst" s!"{m}\t{c.name}\t{kindOf c}"
+  match env.find? thm with
+  | none => out "found" "no"
+  | some ci =>
+    out "found" "yes"
+    out "kind" (kindOf ci)
+    let modName := match env.getModuleIdxFor? thm with
+      | some idx => toString (env.header.moduleNames[idx.toNat]!)
+      | none => "<current file>"
+    out "module" modName
+    for c in ci.type.getUsedConstants do
+      let mod := match env.getModuleIdxFor? c with
+        | some idx => toString (env.header.moduleNames[idx.toNat]!)
+        | none => "<current file>"
+      let k := match env.find? c with
+        | some cc => kindOf cc
+        | none => "?"
+      out "typeconst" s!"{mod}\t{c}\t{k}"
+    let axs ← liftCoreM (collectAxioms thm)
+    for a in axs do
+      out "axiom" (toString a)
+    let ty ← liftTermElabM <| withOptions (fun o => pp.fullNames.set o true) <| ppExpr ci.type
+    out "type" (toString ty |>.replace "\n" " ")
