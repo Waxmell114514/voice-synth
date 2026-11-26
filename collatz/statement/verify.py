@@ -15,6 +15,7 @@ Checks, in order (see bootstrap.md, "验证接口"):
      Claim check: statement/Final.lean with the theorem substituted elaborates or not.
   5. leanchecker replays Statement and every Lib module through the kernel.
 """
+import fcntl
 import hashlib
 import json
 import os
@@ -253,9 +254,18 @@ def main():
                 lib_in_type.append(name)
         claim = claim_check(thm)
         mods = ["Statement"] + sorted(lib_modules | {"Lib"})
-        r = run(["lake", "env", "leanchecker"] + mods, timeout=6 * 3600)
-        if r.returncode != 0:
-            raise Fail("leanchecker: " + (r.stdout + r.stderr).strip()[:500])
+        # one module per call: leanchecker re-imports the environment for every module argument,
+        # so memory grows with the number of arguments (measured: 4 modules > 14 GB)
+        # and only one leanchecker at a time on the machine (all worktrees share one memory limit)
+        lockdir = os.path.expanduser("~/.cache")
+        os.makedirs(lockdir, exist_ok=True)
+        with open(os.path.join(lockdir, "collatz-leanchecker.lock"), "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)
+            for mod in mods:
+                r = run(["lake", "env", "leanchecker", mod], timeout=6 * 3600)
+                if r.returncode != 0:
+                    raise Fail(f"leanchecker {mod} exit {r.returncode}: "
+                               + (r.stdout + r.stderr).strip()[:500])
         details += [
             f"theorem: {thm}",
             f"module: {facts['module']}",

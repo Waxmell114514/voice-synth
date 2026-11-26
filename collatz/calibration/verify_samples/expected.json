@@ -1,0 +1,143 @@
+{
+ "P1_small_range": {
+  "thm": "Lib.Sample.collatz_upto_200",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "P2_control_cycles": {
+  "thm": "Lib.Sample.cycles_3p1_neg",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a",
+  "also": [
+   "Lib.Sample.cycle_3m1_5",
+   "Lib.Sample.cycle_3m1_17",
+   "Lib.Sample.cycle_5p1_13"
+  ]
+ },
+ "P3_registered_gap": {
+  "thm": "Lib.Sample.collatz_of_gap",
+  "verdict": "PASS",
+  "claim": "CollatzConjecture",
+  "final": "n/a",
+  "gaps": "Lib.Sample.gap_test\tO\tr00\tcalibration only: the conjecture itself\n"
+ },
+ "P4_comment_trap": {
+  "thm": "Lib.Sample.t",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "R01_sorry": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "FAIL"
+ },
+ "R02_axiom": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "FAIL"
+ },
+ "R03_native_decide": {
+  "thm": "Lib.Sample.reaches_27",
+  "verdict": "FAIL"
+ },
+ "R04_local_redef": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "FAIL"
+ },
+ "R05_renamed_redef": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "R06_vacuous_hyp": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "R07_exists_not_forall": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "R08_almost_all": {
+  "thm": "Lib.Sample.collatz_most",
+  "verdict": "PASS",
+  "claim": "lemma",
+  "final": "n/a"
+ },
+ "R09_unsafe": {
+  "thm": "Lib.Sample.collatz_small",
+  "verdict": "FAIL"
+ },
+ "R10_implemented_by": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL"
+ },
+ "R11_skip_kernel": {
+  "thm": "Lib.Sample.bogus",
+  "verdict": "FAIL"
+ },
+ "R12_ofReduceBool": {
+  "thm": "Lib.Sample.reaches_27",
+  "verdict": "FAIL"
+ },
+ "R13_import_final": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL"
+ },
+ "R14_modified_statement": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL",
+  "patch": [
+   "statement/Statement.lean",
+   "3 * n + 1",
+   "3 * n + 3"
+  ]
+ },
+ "R15_modified_verify": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL",
+  "patch": [
+   "statement/verify.py",
+   "STD_AXIOMS = {\"propext\",",
+   "STD_AXIOMS = {\"sorryAx\", \"propext\","
+  ]
+ },
+ "R16_modified_lakefile": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL",
+  "patch": [
+   "lakefile.toml",
+   "srcDir = \"lib\"",
+   "srcDir = \"lib\"\nmoreLeanArgs = [\"-DwarningAsError=false\"]"
+  ]
+ },
+ "R17_stray_file": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL",
+  "extra": [
+   "lib/Other.lean",
+   "theorem other : (1:Nat) = 1 := sorry\n"
+  ]
+ },
+ "R18_unused_unregistered_axiom": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL"
+ },
+ "R19_env_hack": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "FAIL"
+ },
+ "R20_meta_sorry": {
+  "thm": "Lib.Sample.collatz",
+  "verdict": "FAIL"
+ },
+ "R21_meta_trustCompiler": {
+  "thm": "Lib.Sample.t",
+  "verdict": "FAIL"
+ }
+}

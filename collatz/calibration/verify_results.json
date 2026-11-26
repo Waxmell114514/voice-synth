@@ -1,0 +1,19 @@
+{
+ "R21_meta_trustCompiler": {
+  "results": [
+   {
+    "thm": "Lib.Sample.t",
+    "expected": {
+     "verdict": "FAIL"
+    },
+    "got": {
+     "verdict": "FAIL",
+     "first_line": "FAIL Lib.Sample.t: depends on non-standard, unregistered axiom: Lean.trustCompiler",
+     "exit": 1
+    },
+    "correct": true
+   }
+  ],
+  "seconds": 29.5
+ }
+}

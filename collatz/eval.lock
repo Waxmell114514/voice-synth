@@ -10,7 +10,7 @@
   "statement/README.md": "aa700ab392fcfa508b2f62c9d4e01c2971cdeb7251ddd4b5ada7b333da2da9ac",
   "statement/Statement.lean": "ded619d400cda13d56f7542221646f83901beb827ae7dfa7c3c78b174fab1307",
   "statement/upstream/CollatzConjecture.lean": "2b95a1e3c230d810703bd3151d6a7aa8544844b38c47466bd05c76fdeecedc1c",
-  "statement/verify.py": "c203ea73daa75ef236ba0f5f04f2812b71182f3d4b27a324866cd64db28ed3c5",
+  "statement/verify.py": "c0380a3a7f184dcec09e91b11942f1a228191aa8a45d59e0bb7f69c08ef3f9e9",
   "statement/verify.sh": "7c96954e3e87633d72b99eae742d0681e4fc03e7fa4a003e028540f299a0e55f"
  }
 }
