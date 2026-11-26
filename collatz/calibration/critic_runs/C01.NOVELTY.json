@@ -1,0 +1,8 @@
+{"item": "C01", "role": "NOVELTY", "verdict": "reject",
+ "claim_summary": "用对奇数 k 的强归纳（k < 2^60 已验证）给出 3x+1（Collatz）猜想的初等证明：所有正整数在 g 的迭代下都到达 1。",
+ "error_quote": "When p + q = 2, by Case 1 we obtain that f (k) ∈ E.",
+ "error_reason": "文献定位：这正是 Llibre 和 Valls 的 arXiv:2110.12228v1（2021-10-23，摘要逐字相同：'We provide an elementary proof of this conjecture using an induction process'）。v2（2021-10-27）被作者撤回，v3（2021-11-22）的摘要改成只'provide some information related with this conjecture'，另有检索摘要说作者承认用归纳法证明没有成功。Collatz 猜想公认仍未解决，所以这份 Claim 与已知状态矛盾，并非新结果。具体错处在 Case 3：k=2^p h−1，p≥2，3∤h。这时 f(k)=(3k+1)/2=2^{p-1}·3h−1 > k，作者把 Case 1、Case 2 套到 f(k) 上，但这两种情形只在归纳假设覆盖比被处理的数更小的奇数时才成立，而这里的归纳假设只覆盖 ≤k−2 的奇数。(a) p+q=2，即 f(k)≡1 mod 4 的分支：Case 1 需要 f(f(k)) ∈ E，可 f(f(k)) 可能 > k。例：k=27 时 f(27)=41，f(41)=31>25，不在归纳假设范围内。(b) p+q>2 的分支（'When p + q > 2, by Case 2 we obtain that f (k) ∈ E'）：Case 2 对 f(k) 构造的那个更小前驱 2^{p}h−1 正好就是 k 本身（例：k=7 时 f(7)=11，Case 2 对 11 要求 7∈E；k=23 时 f(23)=35，Case 2 要求 23∈E），所以这一步是循环论证。Case 1（k≡1 mod 4 时下降）和 Case 2（k 有更小的 f 前驱）本身成立，难点 k≡3 mod 4、3∤h 并没有被处理。还有一处小问题：'Let h̄ = 3(3h̄ + δ) = 2q ·3h′' 里 3h 是奇数，所以 q 恒为 0，这个引入毫无作用。",
+ "taxonomy": ["E03", "E02", "E12"],
+ "control_check": "python3 精确整数（f(k)=把 3k+1 的因子 2 全部除掉）：k=7 → f=11=2^2·3−1，Case 2 对 f(k) 需要的前驱=7==k，输出 True；k=27 → f=41=2·21−1，f(41)=31，31<=k−2 为 False；k=59 → f=89，f(89)=67>57，False；k=23 → f=35，所需前驱=23==k，True。对照 3n−1：f(5)=7，f(7)=5，即圈 5→7→5。那里 7≡3 mod 4，处境和 Case 3 一样：f(7)=5 虽然更小，可 5 的轨道又回到 7。这说明'上升到 f(k) 再借用 Case 1/2'这一步要是成立，同样会把 3n−1 的圈'证掉'；归纳的漏洞正好落在该圈所在的剩余类上。",
+ "confidence": 0.95,
+ "lesson": "C01 就是 Llibre 和 Valls 已撤回的 arXiv:2110.12228v1。强归纳证明要逐个检查：每次援引的子情形，作用对象是否真的落在归纳假设范围（< k）以内。把子情形用在 f(k)>k 上就是 E03，回指到 k 本身就是 E02。"}
